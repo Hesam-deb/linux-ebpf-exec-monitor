@@ -10,6 +10,7 @@
   const openStorageKey = "ebpf-monitor-open-details";
   let selectedEventId = sessionStorage.getItem(openStorageKey);
   let requestInFlight = false;
+  let pendingEvents = null;
   let usageHistory = [];
   const chartAnimations = new Map();
   const chartGeometry = new Map();
@@ -201,6 +202,10 @@
     selectedEventId = null;
     sessionStorage.removeItem(openStorageKey);
     document.body.classList.remove("detail-overlay-open");
+    if (pendingEvents) {
+      renderEventRows(pendingEvents);
+      pendingEvents = null;
+    }
   }
 
   function bindDetails(details) {
@@ -302,6 +307,16 @@
     return row;
   }
 
+  function renderEventRows(events) {
+    const fragment = document.createDocumentFragment();
+    if (events.length === 0) fragment.append(emptyRow());
+    else events.forEach((event) => fragment.append(processRow(event)));
+    eventsBody.replaceChildren(fragment);
+    knownEventIds = new Set(events.map((event) => event.event_id));
+    knownStatuses = new Map(events.map((event) => [event.event_id, event.status]));
+    eventSignature = events.map((event) => `${event.event_id}:${event.status}`).join("|");
+  }
+
   function updateMonitor(payload) {
     const badge = document.getElementById("monitor-status");
     badge.className = `monitor-badge monitor-badge-${payload.monitor_status}`;
@@ -348,17 +363,15 @@
     if (selectedEventId && !currentIds.has(selectedEventId)) closeSelectedDetails();
 
     if (listChanged) {
-      const fragment = document.createDocumentFragment();
-      if (payload.events.length === 0) fragment.append(emptyRow());
-      else payload.events.forEach((event) => fragment.append(processRow(event)));
-      eventsBody.replaceChildren(fragment);
+      if (selectedEventId) {
+        pendingEvents = payload.events;
+        updateLiveDurations(payload.events);
+      } else {
+        renderEventRows(payload.events);
+      }
     } else {
       updateLiveDurations(payload.events);
     }
-
-    knownEventIds = currentIds;
-    knownStatuses = new Map(payload.events.map((event) => [event.event_id, event.status]));
-    eventSignature = nextEventSignature;
   }
 
   async function poll() {

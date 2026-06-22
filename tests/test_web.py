@@ -97,6 +97,9 @@ class DashboardTests(unittest.TestCase):
             self.assertIn(b"requestAnimationFrame", response.data)
             self.assertIn(b"inspectChart", response.data)
             self.assertIn(b"pointermove", response.data)
+            self.assertIn(b"pendingEvents", response.data)
+            self.assertIn(b"if (selectedEventId)", response.data)
+            self.assertIn(b"renderEventRows(pendingEvents)", response.data)
         finally:
             response.close()
 
