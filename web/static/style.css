@@ -7,7 +7,7 @@ body {
   margin: 0;
   background: #101418;
   color: #e6edf3;
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+  font-family: "Vazirmatn", Tahoma, sans-serif;
 }
 
 h1 {
@@ -61,7 +61,6 @@ h1 {
   color: #8b949e;
   font-size: 0.82rem;
   font-weight: 700;
-  text-transform: uppercase;
 }
 
 .table td,
@@ -74,4 +73,10 @@ h1 {
   padding: 2rem !important;
   color: #8b949e !important;
   text-align: center;
+}
+
+.technical-value {
+  direction: ltr;
+  unicode-bidi: embed;
+  text-align: right;
 }

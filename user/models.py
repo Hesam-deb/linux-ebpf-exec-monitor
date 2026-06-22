@@ -55,7 +55,7 @@ class EventStore:
         """Return dashboard statistics."""
         with self._lock:
             commands = {event.command for event in self._events}
-            last_update = self._events[0].timestamp if self._events else "Waiting"
+            last_update = self._events[0].timestamp if self._events else "در انتظار رویداد"
             return {
                 "total_events": self._total_events,
                 "unique_commands": len(commands),

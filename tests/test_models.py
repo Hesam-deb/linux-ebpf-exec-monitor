@@ -52,7 +52,7 @@ class EventStoreTests(unittest.TestCase):
             {
                 "total_events": 0,
                 "unique_commands": 0,
-                "last_update": "Waiting",
+                "last_update": "در انتظار رویداد",
             },
         )
 

@@ -1,5 +1,7 @@
 # Linux eBPF Process Execution Monitor
 
+[مطالعهٔ راهنما به فارسی](README.fa.md)
+
 A lightweight university proof-of-concept that captures Linux process execution events with eBPF and shows them in a small Flask dashboard.
 
 The goal is to demonstrate Linux kernel observability, eBPF event delivery, and a simple user-space presentation layer. It is intentionally small and not designed as a production security monitoring system.
@@ -120,6 +122,7 @@ linux-ebpf-exec-monitor/
 │   └── test_web.py
 ├── requirements.txt
 ├── README.md
+├── README.fa.md
 ├── LICENSE
 └── .gitignore
 ```

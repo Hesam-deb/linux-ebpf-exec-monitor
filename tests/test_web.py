@@ -21,6 +21,9 @@ class DashboardTests(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertIn(b"pytest", response.data)
         self.assertIn(b"42", response.data)
+        self.assertIn('lang="fa" dir="rtl"'.encode(), response.data)
+        self.assertIn("پایشگر اجرای پردازش‌ها".encode(), response.data)
+        self.assertIn(b"Vazirmatn", response.data)
 
     def test_api_returns_current_events_and_stats(self) -> None:
         event = ExecEvent(pid=7, command="bash", timestamp_ns=0)
