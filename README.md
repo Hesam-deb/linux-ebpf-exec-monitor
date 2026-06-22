@@ -6,7 +6,30 @@
 
 [Download the bilingual PDF project report](docs/project-report.pdf)
 
-This small educational project listens for successful process executions with eBPF and presents them in a clean Persian dashboard. It is a practical way to explore Linux tracepoints, BCC perf buffers, thread-safe event storage, and a Flask web interface without starting from a large observability stack.
+This educational project follows Linux processes from successful execution to exit and presents the result in a live Persian/English dashboard. It is a practical introduction to tracepoints, BCC perf buffers, `/proc` enrichment, event correlation, and Flask.
+
+## Quick start
+
+```bash
+git clone https://github.com/Hesam-deb/linux-ebpf-exec-monitor.git
+cd linux-ebpf-exec-monitor
+chmod +x scripts/install.sh scripts/run.sh
+./scripts/install.sh
+sudo ./scripts/run.sh
+```
+
+Open `http://127.0.0.1:5000`. Use `Ctrl+C` to stop.
+
+> This project requires Linux, matching kernel headers, and root privileges. Ubuntu 24.04 is the primary supported environment.
+
+## Documentation
+
+- [Persian guide](README.fa.md)
+- [Bilingual PDF report](docs/project-report.pdf)
+- [Editable HTML report](docs/project-report.html)
+- JSON API: `http://127.0.0.1:5000/api/events`
+
+The report bundles Vazirmatn under the [SIL Open Font License 1.1](docs/assets/fonts/OFL.txt).
 
 ## What you will see
 
@@ -64,7 +87,7 @@ BCC is intentionally installed through Ubuntu packages rather than PyPI because 
 
 > Windows and macOS cannot run this project directly because it loads a program into the Linux kernel. Use an Ubuntu virtual machine. WSL may work only when its kernel and BCC support are configured correctly, so a VM is the simpler option.
 
-## Get the project
+## Clone the repository
 
 Choose either HTTPS:
 
@@ -85,7 +108,7 @@ Repository addresses:
 - HTTPS: `https://github.com/Hesam-deb/linux-ebpf-exec-monitor.git`
 - SSH: `git@github.com:Hesam-deb/linux-ebpf-exec-monitor.git`
 
-## Install
+## Install dependencies
 
 ```bash
 chmod +x scripts/install.sh scripts/run.sh
@@ -94,7 +117,7 @@ chmod +x scripts/install.sh scripts/run.sh
 
 The installer checks the operating system and kernel, installs the required system packages, creates `.venv`, installs the Python dependencies, and verifies that both BCC and Flask can be imported.
 
-## Run
+## Run the monitor
 
 Start the monitor:
 
@@ -168,6 +191,8 @@ Tests do not load eBPF and do not require root:
 .venv/bin/python -m unittest discover -s tests -v
 ```
 
+The test suite validates lifecycle correlation, exit decoding, API output, bilingual rendering, live polling, preserved detail selection, and eBPF pipeline metrics. Kernel probe attachment still requires the privileged verification command in the troubleshooting section.
+
 ## Troubleshooting
 
 ### `BCC Python bindings are not installed`
@@ -216,7 +241,7 @@ linux-ebpf-exec-monitor/
 ├── web/                   # Flask app, template, and styles
 ├── scripts/               # Installation and run helpers
 ├── tests/                 # Model and dashboard tests
-├── docs/                  # Bilingual HTML/PDF project report
+├── docs/                  # Bilingual report and bundled Vazirmatn fonts
 ├── requirements.txt       # Python dashboard dependency
 ├── README.md
 ├── README.fa.md

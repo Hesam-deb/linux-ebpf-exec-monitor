@@ -4,6 +4,18 @@
   <meta charset="utf-8">
   <title>Linux eBPF Process Lifecycle Monitor — Project Report</title>
   <style>
+    @font-face {
+      font-family: "Vazirmatn Embedded";
+      src: url("assets/fonts/Vazirmatn-Regular.ttf") format("truetype");
+      font-style: normal;
+      font-weight: 400;
+    }
+    @font-face {
+      font-family: "Vazirmatn Embedded";
+      src: url("assets/fonts/Vazirmatn-Bold.ttf") format("truetype");
+      font-style: normal;
+      font-weight: 700;
+    }
     @page { size: A4; margin: 18mm; }
     body {
       color: #172033;
@@ -48,15 +60,35 @@
     .fa {
       direction: rtl;
       text-align: right;
-      font-family: "Vazirmatn", "DejaVu Sans", sans-serif;
+      font-family: "Vazirmatn Embedded", "Vazirmatn", "DejaVu Sans", sans-serif;
+      font-feature-settings: "kern";
+      line-height: 1.9;
+    }
+    .fa h1, .fa h2, .fa h3, .fa p, .fa li, .fa th, .fa td {
+      direction: rtl;
+      text-align: right;
+    }
+    .fa code, .fa pre, .ltr {
+      direction: ltr;
+      text-align: left;
+      unicode-bidi: embed;
+    }
+    .fa ul { padding-right: 20pt; padding-left: 0; }
+    .fa .meta { border-right: 4pt solid #38bdf8; }
+    .cover {
+      padding: 18pt;
+      border-radius: 8pt;
+      background: #f0f9ff;
     }
     .page-break { page-break-before: always; }
     footer { margin-top: 24pt; color: #64748b; font-size: 8.5pt; text-align: center; }
   </style>
 </head>
 <body>
-  <h1>Linux eBPF Process Lifecycle Monitor</h1>
-  <div class="subtitle">Bilingual project report / گزارش دوزبانهٔ پروژه</div>
+  <div class="cover">
+    <h1>Linux eBPF Process Lifecycle Monitor</h1>
+    <div class="subtitle">Bilingual project report / گزارش دوزبانهٔ پروژه</div>
+  </div>
   <p class="meta">
     Repository: <code>https://github.com/Hesam-deb/linux-ebpf-exec-monitor</code><br>
     Report date: June 22, 2026<br>
@@ -151,7 +183,7 @@ sudo ./scripts/run.sh</pre>
   </ul>
 
   <div class="page-break"></div>
-  <section class="fa" lang="fa">
+  <section class="fa" lang="fa" dir="rtl">
     <h1>گزارش پروژهٔ پایش چرخهٔ عمر پردازش‌ها با eBPF</h1>
     <p class="meta">
       مخزن: <code>https://github.com/Hesam-deb/linux-ebpf-exec-monitor</code><br>
