@@ -25,18 +25,22 @@ app = Flask(__name__)
 event_store = EventStore(max_events=100)
 monitor = ExecMonitor(event_store)
 monitor_error: str | None = None
+monitor_status = "starting"
 
 
 def start_monitor_thread() -> None:
     """Start the eBPF monitor in a daemon thread."""
-    global monitor_error
+    global monitor_error, monitor_status
 
     def target() -> None:
-        global monitor_error
+        global monitor_error, monitor_status
         try:
+            monitor.start()
+            monitor_status = "active"
             monitor.poll_forever()
         except Exception as exc:
             monitor_error = str(exc)
+            monitor_status = "error"
             LOGGER.exception("Monitor failed to start")
 
     thread = threading.Thread(target=target, name="ebpf-monitor", daemon=True)
@@ -51,6 +55,7 @@ def index() -> str:
         events=[event.to_dict() for event in event_store.latest()],
         stats=event_store.stats(),
         monitor_error=monitor_error,
+        monitor_status=monitor_status,
     )
 
 
@@ -62,6 +67,7 @@ def api_events() -> Any:
             "events": [event.to_dict() for event in event_store.latest()],
             "stats": event_store.stats(),
             "monitor_error": monitor_error,
+            "monitor_status": monitor_status,
         }
     )
 

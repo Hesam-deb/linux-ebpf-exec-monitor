@@ -11,6 +11,8 @@ from user.models import EventStore, ExecEvent
 class DashboardTests(unittest.TestCase):
     def setUp(self) -> None:
         dashboard.event_store = EventStore()
+        dashboard.monitor_error = None
+        dashboard.monitor_status = "active"
         self.client = dashboard.app.test_client()
 
     def test_index_renders_current_events(self) -> None:
@@ -24,6 +26,8 @@ class DashboardTests(unittest.TestCase):
         self.assertIn('lang="fa" dir="rtl"'.encode(), response.data)
         self.assertIn("پایشگر اجرای پردازش‌ها".encode(), response.data)
         self.assertIn(b"Vazirmatn", response.data)
+        self.assertIn("مشاهدهٔ خروجی JSON".encode(), response.data)
+        self.assertIn("پایشگر فعال است".encode(), response.data)
 
     def test_api_returns_current_events_and_stats(self) -> None:
         event = ExecEvent(pid=7, command="bash", timestamp_ns=0)
@@ -43,8 +47,12 @@ class DashboardTests(unittest.TestCase):
                     }
                 ],
                 "monitor_error": None,
+                "monitor_status": "active",
                 "stats": {
                     "last_update": event.timestamp,
+                    "latest_command": "bash",
+                    "max_events": 100,
+                    "retained_events": 1,
                     "total_events": 1,
                     "unique_commands": 1,
                 },

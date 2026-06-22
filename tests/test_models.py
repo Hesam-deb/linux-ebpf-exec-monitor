@@ -37,7 +37,14 @@ class EventStoreTests(unittest.TestCase):
 
         self.assertEqual([event.pid for event in store.latest()], [3, 2])
         self.assertEqual(store.stats()["total_events"], 3)
+        self.assertEqual(store.stats()["retained_events"], 2)
+        self.assertEqual(store.stats()["max_events"], 2)
         self.assertEqual(store.stats()["unique_commands"], 2)
+        self.assertEqual(store.stats()["latest_command"], "third")
+
+    def test_store_rejects_non_positive_capacity(self) -> None:
+        with self.assertRaises(ValueError):
+            EventStore(max_events=0)
 
     def test_stats_reports_latest_event_timestamp(self) -> None:
         store = EventStore()
@@ -51,8 +58,11 @@ class EventStoreTests(unittest.TestCase):
             EventStore().stats(),
             {
                 "total_events": 0,
+                "retained_events": 0,
+                "max_events": 100,
                 "unique_commands": 0,
                 "last_update": "در انتظار رویداد",
+                "latest_command": "—",
             },
         )
 

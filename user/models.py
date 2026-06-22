@@ -36,6 +36,10 @@ class EventStore:
     """Thread-safe in-memory store that keeps only the latest events."""
 
     def __init__(self, max_events: int = 100) -> None:
+        if max_events <= 0:
+            raise ValueError("max_events must be greater than zero")
+
+        self._max_events = max_events
         self._events: Deque[ExecEvent] = deque(maxlen=max_events)
         self._total_events = 0
         self._lock = Lock()
@@ -56,8 +60,12 @@ class EventStore:
         with self._lock:
             commands = {event.command for event in self._events}
             last_update = self._events[0].timestamp if self._events else "در انتظار رویداد"
+            latest_command = self._events[0].command if self._events else "—"
             return {
                 "total_events": self._total_events,
+                "retained_events": len(self._events),
+                "max_events": self._max_events,
                 "unique_commands": len(commands),
                 "last_update": last_update,
+                "latest_command": latest_command,
             }

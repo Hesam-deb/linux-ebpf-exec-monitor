@@ -1,1 +1,4 @@
-Flask==3.0.3
+# Web dashboard runtime.
+# BCC is installed from Ubuntu's python3-bpfcc package because it includes
+# native bindings matched to the system libraries and kernel tooling.
+Flask>=3.0,<4.0
