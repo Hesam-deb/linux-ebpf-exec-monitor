@@ -10,6 +10,9 @@
   const openStorageKey = "ebpf-monitor-open-details";
   let selectedEventId = sessionStorage.getItem(openStorageKey);
   let requestInFlight = false;
+  let usageHistory = [];
+  const chartAnimations = new Map();
+  const chartGeometry = new Map();
   let knownEventIds = new Set(
     [...eventsBody.querySelectorAll("tr[data-event-id]")].map((row) => row.dataset.eventId),
   );
@@ -55,8 +58,8 @@
     return value === null || value === undefined || value === "" ? t.not_available : value;
   }
 
-  function chartPoints(values, maxValue = 100) {
-    if (values.length === 0) return "";
+  function chartCoordinates(values, maxValue = 100) {
+    if (values.length === 0) return [];
     const width = 300;
     const height = 72;
     const denominator = Math.max(1, values.length - 1);
@@ -64,18 +67,65 @@
       .map((value, index) => {
         const x = (index / denominator) * width;
         const y = height - Math.min(maxValue, Math.max(0, value)) / maxValue * height + 5;
-        return `${x.toFixed(1)},${y.toFixed(1)}`;
-      })
-      .join(" ");
+        return [x, y];
+      });
   }
 
-  function areaPath(points) {
-    if (!points) return "";
-    const pairs = points.split(" ");
+  function coordinatesToPoints(coordinates) {
+    return coordinates.map(([x, y]) => `${x.toFixed(1)},${y.toFixed(1)}`).join(" ");
+  }
+
+  function areaPath(coordinates) {
+    if (coordinates.length === 0) return "";
+    const pairs = coordinates.map(([x, y]) => `${x.toFixed(1)},${y.toFixed(1)}`);
     return `M ${pairs[0]} L ${pairs.slice(1).join(" L ")} L 300,82 L 0,82 Z`;
   }
 
+  function normalizedCoordinates(coordinates, length) {
+    if (coordinates.length === length) return coordinates;
+    if (coordinates.length === 0) return Array.from({ length }, () => [0, 77]);
+    return Array.from({ length }, (_, index) => {
+      const sourceIndex = Math.min(coordinates.length - 1, index);
+      return coordinates[sourceIndex];
+    });
+  }
+
+  function animateChart(id, nextCoordinates, areaId = null) {
+    const element = document.getElementById(id);
+    const previous = chartGeometry.get(id) || nextCoordinates;
+    const length = Math.max(previous.length, nextCoordinates.length);
+    const from = normalizedCoordinates(previous, length);
+    const to = normalizedCoordinates(nextCoordinates, length);
+    const priorAnimation = chartAnimations.get(id);
+    if (priorAnimation) cancelAnimationFrame(priorAnimation);
+
+    const start = performance.now();
+    const duration = 260;
+    function frame(now) {
+      const progress = Math.min(1, (now - start) / duration);
+      const eased = progress < 0.5
+        ? 2 * progress * progress
+        : 1 - Math.pow(-2 * progress + 2, 2) / 2;
+      const current = from.map(([fromX, fromY], index) => {
+        const [toX, toY] = to[index];
+        return [
+          fromX + (toX - fromX) * eased,
+          fromY + (toY - fromY) * eased,
+        ];
+      });
+      element.setAttribute("points", coordinatesToPoints(current));
+      if (areaId) document.getElementById(areaId).setAttribute("d", areaPath(current));
+      if (progress < 1) chartAnimations.set(id, requestAnimationFrame(frame));
+      else {
+        chartGeometry.set(id, nextCoordinates);
+        chartAnimations.delete(id);
+      }
+    }
+    chartAnimations.set(id, requestAnimationFrame(frame));
+  }
+
   function updateUsage(usage) {
+    usageHistory = usage.history;
     const current = usage.current;
     updateText("monitor-cpu", current.monitor_cpu);
     updateText("monitor-memory", current.monitor_memory_mb);
@@ -85,17 +135,56 @@
 
     const monitorValues = usage.history.map((sample) => sample.monitor_cpu);
     const monitorMax = Math.max(100, ...monitorValues);
-    const monitorPoints = chartPoints(monitorValues, monitorMax);
-    document.getElementById("monitor-cpu-line").setAttribute("points", monitorPoints);
-    document.getElementById("monitor-cpu-area").setAttribute("d", areaPath(monitorPoints));
-    document.getElementById("system-cpu-line").setAttribute(
-      "points",
-      chartPoints(usage.history.map((sample) => sample.system_cpu)),
+    animateChart(
+      "monitor-cpu-line",
+      chartCoordinates(monitorValues, monitorMax),
+      "monitor-cpu-area",
     );
-    document.getElementById("system-memory-line").setAttribute(
-      "points",
-      chartPoints(usage.history.map((sample) => sample.system_memory)),
+    animateChart(
+      "system-cpu-line",
+      chartCoordinates(usage.history.map((sample) => sample.system_cpu)),
     );
+    animateChart(
+      "system-memory-line",
+      chartCoordinates(usage.history.map((sample) => sample.system_memory)),
+    );
+  }
+
+  function inspectChart(shell, event) {
+    if (usageHistory.length === 0) return;
+    const rect = shell.getBoundingClientRect();
+    const ratio = Math.min(1, Math.max(0, (event.clientX - rect.left) / rect.width));
+    const index = Math.round(ratio * Math.max(0, usageHistory.length - 1));
+    const sample = usageHistory[index];
+    const x = usageHistory.length === 1 ? 0 : index / (usageHistory.length - 1) * 300;
+    const kind = shell.dataset.chart;
+    const crosshair = shell.querySelector(".chart-crosshair");
+    crosshair.setAttribute("x1", x);
+    crosshair.setAttribute("x2", x);
+
+    const tooltip = shell.querySelector(".chart-tooltip");
+    const left = Math.min(rect.width - 145, Math.max(0, ratio * rect.width - 70));
+    tooltip.style.left = `${left}px`;
+
+    if (kind === "monitor") {
+      const max = Math.max(100, ...usageHistory.map((item) => item.monitor_cpu));
+      const point = chartCoordinates(usageHistory.map((item) => item.monitor_cpu), max)[index];
+      const marker = shell.querySelector(".monitor-marker");
+      marker.setAttribute("cx", point[0]);
+      marker.setAttribute("cy", point[1]);
+      tooltip.textContent = `${t.cpu_usage}: ${sample.monitor_cpu}% · ${t.memory_usage}: ${sample.monitor_memory_mb} MB`;
+    } else {
+      const cpuPoint = chartCoordinates(usageHistory.map((item) => item.system_cpu))[index];
+      const memoryPoint = chartCoordinates(usageHistory.map((item) => item.system_memory))[index];
+      const cpuMarker = shell.querySelector(".system-marker");
+      const memoryMarker = shell.querySelector(".memory-marker");
+      cpuMarker.setAttribute("cx", cpuPoint[0]);
+      cpuMarker.setAttribute("cy", cpuPoint[1]);
+      memoryMarker.setAttribute("cx", memoryPoint[0]);
+      memoryMarker.setAttribute("cy", memoryPoint[1]);
+      tooltip.textContent = `${t.cpu_usage}: ${sample.system_cpu}% · ${t.memory_usage}: ${sample.system_memory}% · ${t.load_average}: ${sample.load_average}`;
+    }
+    shell.classList.add("is-inspecting");
   }
 
   function detailItem(label, value, wide = false) {
@@ -291,6 +380,13 @@
 
   document.querySelectorAll(".process-details").forEach((details) => {
     bindDetails(details);
+  });
+
+  document.querySelectorAll(".chart-shell").forEach((shell) => {
+    shell.addEventListener("pointermove", (event) => inspectChart(shell, event));
+    shell.addEventListener("pointerdown", (event) => inspectChart(shell, event));
+    shell.addEventListener("pointerleave", () => shell.classList.remove("is-inspecting"));
+    shell.addEventListener("pointercancel", () => shell.classList.remove("is-inspecting"));
   });
 
   document.addEventListener("keydown", (event) => {

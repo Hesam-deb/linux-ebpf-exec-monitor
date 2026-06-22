@@ -71,16 +71,21 @@
               <strong><span id="monitor-memory">{{ usage.current.monitor_memory_mb }}</span> MB</strong>
             </div>
           </div>
-          <svg class="usage-chart" viewBox="0 0 300 82" preserveAspectRatio="none" role="img" aria-label="{{ t.monitor_usage }}">
-            <defs>
-              <linearGradient id="monitor-area-gradient" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stop-color="#38bdf8" stop-opacity="0.3"></stop>
-                <stop offset="100%" stop-color="#38bdf8" stop-opacity="0"></stop>
-              </linearGradient>
-            </defs>
-            <path id="monitor-cpu-area" class="chart-area monitor-area" d=""></path>
-            <polyline id="monitor-cpu-line" class="chart-line monitor-line" points=""></polyline>
-          </svg>
+          <div class="chart-shell" data-chart="monitor">
+            <svg class="usage-chart" viewBox="0 0 300 82" preserveAspectRatio="none" role="img" aria-label="{{ t.monitor_usage }}">
+              <defs>
+                <linearGradient id="monitor-area-gradient" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stop-color="#38bdf8" stop-opacity="0.3"></stop>
+                  <stop offset="100%" stop-color="#38bdf8" stop-opacity="0"></stop>
+                </linearGradient>
+              </defs>
+              <path id="monitor-cpu-area" class="chart-area monitor-area" d=""></path>
+              <polyline id="monitor-cpu-line" class="chart-line monitor-line" points=""></polyline>
+              <line class="chart-crosshair" x1="0" y1="5" x2="0" y2="77"></line>
+              <circle class="chart-marker monitor-marker" r="4" cx="0" cy="0"></circle>
+            </svg>
+            <div class="chart-tooltip" role="status"></div>
+          </div>
         </article>
 
         <article class="usage-card">
@@ -105,10 +110,16 @@
               <strong id="load-average">{{ usage.current.load_average }}</strong>
             </div>
           </div>
-          <svg class="usage-chart" viewBox="0 0 300 82" preserveAspectRatio="none" role="img" aria-label="{{ t.system_usage }}">
-            <polyline id="system-memory-line" class="chart-line memory-line" points=""></polyline>
-            <polyline id="system-cpu-line" class="chart-line system-line" points=""></polyline>
-          </svg>
+          <div class="chart-shell" data-chart="system">
+            <svg class="usage-chart" viewBox="0 0 300 82" preserveAspectRatio="none" role="img" aria-label="{{ t.system_usage }}">
+              <polyline id="system-memory-line" class="chart-line memory-line" points=""></polyline>
+              <polyline id="system-cpu-line" class="chart-line system-line" points=""></polyline>
+              <line class="chart-crosshair" x1="0" y1="5" x2="0" y2="77"></line>
+              <circle class="chart-marker system-marker" r="4" cx="0" cy="0"></circle>
+              <circle class="chart-marker memory-marker" r="4" cx="0" cy="0"></circle>
+            </svg>
+            <div class="chart-tooltip" role="status"></div>
+          </div>
           <div class="chart-legend">
             <span><i class="legend-dot system-dot"></i>{{ t.cpu_usage }}</span>
             <span><i class="legend-dot memory-dot"></i>{{ t.memory_usage }}</span>

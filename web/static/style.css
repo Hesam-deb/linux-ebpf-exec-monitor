@@ -310,16 +310,28 @@ h1 {
   min-width: 5.5rem;
 }
 
-.usage-values span {
+.usage-values > div > span {
   color: var(--muted);
-  font-size: 0.68rem;
+  font-size: 0.74rem;
 }
 
 .usage-values strong {
   display: block;
   margin-top: 0.2rem;
   color: #e0f2fe;
-  font-size: 1.05rem;
+  font-size: clamp(1.35rem, 2vw, 1.7rem);
+  line-height: 1.2;
+}
+
+.usage-values strong span {
+  color: inherit;
+  font-size: inherit;
+}
+
+.chart-shell {
+  position: relative;
+  cursor: crosshair;
+  touch-action: none;
 }
 
 .usage-chart {
@@ -336,13 +348,65 @@ h1 {
   stroke-linejoin: round;
   stroke-width: 2;
   vector-effect: non-scaling-stroke;
-  transition: points 240ms ease-in-out;
 }
 
 .monitor-line { stroke: #38bdf8; }
 .system-line { stroke: #34d399; }
 .memory-line { stroke: #a78bfa; opacity: 0.85; }
 .chart-area { fill: url("#monitor-area-gradient"); }
+
+.chart-crosshair,
+.chart-marker {
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 120ms ease-in-out;
+}
+
+.chart-shell.is-inspecting .chart-crosshair,
+.chart-shell.is-inspecting .chart-marker {
+  opacity: 1;
+}
+
+.chart-crosshair {
+  stroke: rgba(226, 232, 240, 0.38);
+  stroke-dasharray: 3 3;
+  stroke-width: 1;
+  vector-effect: non-scaling-stroke;
+}
+
+.chart-marker {
+  stroke: #07111f;
+  stroke-width: 2;
+  vector-effect: non-scaling-stroke;
+}
+
+.monitor-marker { fill: #38bdf8; }
+.system-marker { fill: #34d399; }
+.memory-marker { fill: #a78bfa; }
+
+.chart-tooltip {
+  position: absolute;
+  z-index: 4;
+  top: 0.3rem;
+  min-width: 8.5rem;
+  padding: 0.5rem 0.65rem;
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  border-radius: 9px;
+  background: rgba(4, 13, 25, 0.94);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.3);
+  color: #dbeafe;
+  font-size: 0.68rem;
+  line-height: 1.75;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(4px);
+  transition: opacity 120ms ease-in-out, transform 120ms ease-in-out;
+}
+
+.chart-shell.is-inspecting .chart-tooltip {
+  opacity: 1;
+  transform: translateY(0);
+}
 
 .chart-legend {
   display: flex;

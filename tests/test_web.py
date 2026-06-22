@@ -93,7 +93,10 @@ class DashboardTests(unittest.TestCase):
             self.assertIn(b"language-leaving", response.data)
             self.assertIn(b"window.location.assign", response.data)
             self.assertIn(b"updateUsage", response.data)
-            self.assertIn(b"chartPoints", response.data)
+            self.assertIn(b"animateChart", response.data)
+            self.assertIn(b"requestAnimationFrame", response.data)
+            self.assertIn(b"inspectChart", response.data)
+            self.assertIn(b"pointermove", response.data)
         finally:
             response.close()
 
