@@ -1,0 +1,77 @@
+:root {
+  color-scheme: dark;
+}
+
+body {
+  min-height: 100vh;
+  margin: 0;
+  background: #101418;
+  color: #e6edf3;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+}
+
+h1 {
+  margin: 0;
+  font-size: clamp(1.7rem, 4vw, 2.6rem);
+  font-weight: 700;
+  letter-spacing: 0;
+}
+
+.stat-card {
+  height: 100%;
+  padding: 1rem;
+  border: 1px solid #2d3844;
+  border-radius: 8px;
+  background: #161b22;
+}
+
+.stat-card span {
+  display: block;
+  margin-bottom: 0.5rem;
+  color: #8b949e;
+  font-size: 0.86rem;
+}
+
+.stat-card strong {
+  display: block;
+  color: #f0f6fc;
+  font-size: 1.5rem;
+  line-height: 1.25;
+  overflow-wrap: anywhere;
+}
+
+.stat-card .time-value {
+  font-size: 1.05rem;
+}
+
+.table-wrap {
+  overflow: hidden;
+  border: 1px solid #2d3844;
+  border-radius: 8px;
+  background: #161b22;
+}
+
+.table {
+  --bs-table-bg: #161b22;
+  --bs-table-hover-bg: #1f2630;
+  color: #e6edf3;
+}
+
+.table thead th {
+  color: #8b949e;
+  font-size: 0.82rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.table td,
+.table th {
+  border-color: #2d3844;
+  white-space: nowrap;
+}
+
+.empty-state {
+  padding: 2rem !important;
+  color: #8b949e !important;
+  text-align: center;
+}
