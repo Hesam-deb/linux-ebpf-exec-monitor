@@ -13,6 +13,12 @@
   let knownEventIds = new Set(
     [...eventsBody.querySelectorAll("tr[data-event-id]")].map((row) => row.dataset.eventId),
   );
+  let knownStatuses = new Map(
+    [...eventsBody.querySelectorAll("tr[data-event-id]")].map((row) => [
+      row.dataset.eventId,
+      row.dataset.status,
+    ]),
+  );
   let eventSignature = [...eventsBody.querySelectorAll("tr[data-event-id]")]
     .map((row) => `${row.dataset.eventId}:${row.dataset.status}`)
     .join("|");
@@ -35,6 +41,14 @@
     node.classList.remove("value-pop");
     void node.offsetWidth;
     node.classList.add("value-pop");
+  }
+
+  function updateLiveDurations(events) {
+    events.forEach((event) => {
+      const row = eventsBody.querySelector(`tr[data-event-id="${CSS.escape(event.event_id)}"]`);
+      const duration = row?.querySelector(".timestamp-cell");
+      if (duration) duration.textContent = event.duration;
+    });
   }
 
   function technicalValue(value) {
@@ -90,6 +104,7 @@
     row.dataset.eventId = event.event_id;
     row.dataset.status = event.status;
     if (!knownEventIds.has(event.event_id)) row.classList.add("is-new-event");
+    else if (knownStatuses.get(event.event_id) !== event.status) row.classList.add("is-status-change");
 
     const commandCell = document.createElement("td");
     commandCell.append(element("span", "command-cell technical-value", event.command));
@@ -199,16 +214,17 @@
     const listChanged = nextEventSignature !== eventSignature;
     if (selectedEventId && !currentIds.has(selectedEventId)) closeSelectedDetails();
 
-    const fragment = document.createDocumentFragment();
-    if (payload.events.length === 0) fragment.append(emptyRow());
-    else payload.events.forEach((event) => fragment.append(processRow(event)));
-    eventsBody.replaceChildren(fragment);
-    if (listChanged && !selectedEventId) {
-      eventsBody.classList.remove("list-refreshed");
-      void eventsBody.offsetWidth;
-      eventsBody.classList.add("list-refreshed");
+    if (listChanged) {
+      const fragment = document.createDocumentFragment();
+      if (payload.events.length === 0) fragment.append(emptyRow());
+      else payload.events.forEach((event) => fragment.append(processRow(event)));
+      eventsBody.replaceChildren(fragment);
+    } else {
+      updateLiveDurations(payload.events);
     }
+
     knownEventIds = currentIds;
+    knownStatuses = new Map(payload.events.map((event) => [event.event_id, event.status]));
     eventSignature = nextEventSignature;
   }
 
@@ -243,10 +259,10 @@
     }
     event.preventDefault();
     const destination = event.currentTarget.href;
-    document.body.classList.add("language-leaving");
+    document.documentElement.classList.add("language-leaving");
     window.setTimeout(() => {
       window.location.assign(destination);
-    }, 110);
+    }, 65);
   });
 
   document.addEventListener("visibilitychange", () => {
