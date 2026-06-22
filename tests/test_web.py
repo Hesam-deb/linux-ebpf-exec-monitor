@@ -49,6 +49,9 @@ class DashboardTests(unittest.TestCase):
         self.assertIn("بار خط لولهٔ eBPF".encode(), response.data)
         self.assertIn(b"fonts.googleapis.com", response.data)
         self.assertIn(b"family=Vazirmatn", response.data)
+        self.assertIn(b"background-aurora", response.data)
+        self.assertIn(b"background-grid", response.data)
+        self.assertIn(b"background-particles", response.data)
 
     def test_english_dashboard_uses_ltr_translations(self) -> None:
         response = self.client.get("/?lang=en")

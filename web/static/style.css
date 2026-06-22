@@ -17,6 +17,7 @@
 }
 
 body {
+  position: relative;
   min-height: 100vh;
   margin: 0;
   overflow-x: hidden;
@@ -27,6 +28,62 @@ body {
   font-family: "Vazirmatn", Tahoma, sans-serif;
 }
 
+.background-aurora,
+.background-grid,
+.background-particles {
+  position: fixed;
+  z-index: -3;
+  inset: 0;
+  pointer-events: none;
+}
+
+.background-aurora {
+  inset: -25%;
+  background:
+    conic-gradient(
+      from 180deg at 50% 50%,
+      rgba(14, 165, 233, 0.09),
+      rgba(139, 92, 246, 0.08),
+      rgba(16, 185, 129, 0.06),
+      rgba(14, 165, 233, 0.09)
+    );
+  filter: blur(70px);
+  animation: aurora-rotate 34s linear infinite;
+}
+
+.background-grid {
+  z-index: -2;
+  background-image:
+    linear-gradient(rgba(125, 211, 252, 0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(125, 211, 252, 0.035) 1px, transparent 1px);
+  background-size: 54px 54px;
+  mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.75), transparent 82%);
+  animation: grid-travel 24s linear infinite;
+}
+
+.background-particles {
+  z-index: -1;
+  overflow: hidden;
+}
+
+.background-particles span {
+  position: absolute;
+  bottom: -2rem;
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: rgba(186, 230, 253, 0.38);
+  box-shadow: 0 0 12px rgba(56, 189, 248, 0.7);
+  animation: particle-rise 18s linear infinite;
+}
+
+.background-particles span:nth-child(1) { left: 8%; animation-duration: 19s; }
+.background-particles span:nth-child(2) { left: 23%; width: 2px; height: 2px; animation-delay: -5s; animation-duration: 24s; }
+.background-particles span:nth-child(3) { left: 44%; animation-delay: -11s; animation-duration: 21s; }
+.background-particles span:nth-child(4) { left: 62%; width: 4px; height: 4px; animation-delay: -3s; animation-duration: 27s; }
+.background-particles span:nth-child(5) { left: 79%; animation-delay: -14s; animation-duration: 22s; }
+.background-particles span:nth-child(6) { left: 92%; width: 2px; height: 2px; animation-delay: -8s; animation-duration: 25s; }
+
 .background-glow {
   position: fixed;
   z-index: -1;
@@ -36,7 +93,7 @@ body {
   opacity: 0.12;
   filter: blur(80px);
   pointer-events: none;
-  animation: glow-drift 14s ease-in-out infinite alternate;
+  animation: glow-drift 14s ease-in-out infinite alternate, glow-breathe 7s ease-in-out infinite;
 }
 
 .background-glow-one {
@@ -200,13 +257,32 @@ h1 {
 }
 
 .stat-card {
+  position: relative;
   min-width: 0;
+  overflow: hidden;
   padding: 1.2rem;
   border: 1px solid var(--border);
   border-radius: 16px;
   background: linear-gradient(145deg, rgba(18, 40, 64, 0.92), var(--surface));
   box-shadow: 0 18px 50px rgba(2, 8, 23, 0.2);
   transition: transform 220ms ease, border-color 220ms ease, box-shadow 220ms ease;
+}
+
+.stat-card::before,
+.load-grid > div::before {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(115deg, transparent 25%, rgba(255, 255, 255, 0.055), transparent 75%);
+  content: "";
+  opacity: 0;
+  transform: translateX(-90%);
+  transition: opacity 180ms ease;
+}
+
+.stat-card:hover::before,
+.load-grid > div:hover::before {
+  opacity: 1;
+  animation: card-sheen 900ms ease;
 }
 
 .stat-card:hover {
@@ -343,7 +419,9 @@ h1 {
 }
 
 .load-grid > div {
+  position: relative;
   min-width: 0;
+  overflow: hidden;
   padding: 0.8rem;
   border: 1px solid rgba(148, 163, 184, 0.1);
   border-radius: 10px;
@@ -677,15 +755,45 @@ html[dir="ltr"] body {
   animation: section-enter 500ms both;
 }
 
-.hero { transition-delay: 60ms; }
-.stats-grid { transition-delay: 110ms; }
-.info-strip { transition-delay: 160ms; }
-.load-panel { transition-delay: 210ms; }
-.events-panel { transition-delay: 260ms; }
+.hero { animation-delay: 60ms; }
+.stats-grid { animation-delay: 110ms; }
+.info-strip { animation-delay: 160ms; }
+.load-panel { animation-delay: 210ms; }
+.events-panel { animation-delay: 260ms; }
+
+.stat-card {
+  animation: card-enter 520ms both;
+}
+
+.stat-card:nth-child(1) { animation-delay: 170ms; }
+.stat-card:nth-child(2) { animation-delay: 220ms; }
+.stat-card:nth-child(3) { animation-delay: 270ms; }
+.stat-card:nth-child(4) { animation-delay: 320ms; }
+
+@keyframes aurora-rotate {
+  to { transform: rotate(360deg) scale(1.08); }
+}
+
+@keyframes grid-travel {
+  from { background-position: 0 0, 0 0; }
+  to { background-position: 54px 54px, 54px 54px; }
+}
+
+@keyframes particle-rise {
+  0% { opacity: 0; transform: translate3d(0, 0, 0) scale(0.7); }
+  15% { opacity: 0.65; }
+  75% { opacity: 0.35; }
+  100% { opacity: 0; transform: translate3d(35px, -110vh, 0) scale(1.3); }
+}
 
 @keyframes glow-drift {
   from { transform: translate3d(-2%, -2%, 0) scale(0.95); }
   to { transform: translate3d(8%, 6%, 0) scale(1.08); }
+}
+
+@keyframes glow-breathe {
+  0%, 100% { opacity: 0.08; }
+  50% { opacity: 0.17; }
 }
 
 @keyframes status-pulse {
@@ -722,6 +830,16 @@ html[dir="ltr"] body {
 @keyframes section-enter {
   from { opacity: 0; transform: translateY(10px); }
   to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes card-enter {
+  from { opacity: 0; transform: translateY(16px) scale(0.98); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes card-sheen {
+  from { transform: translateX(-90%); }
+  to { transform: translateX(90%); }
 }
 
 footer {
