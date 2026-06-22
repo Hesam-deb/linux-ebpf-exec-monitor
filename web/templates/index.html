@@ -52,6 +52,70 @@
         <span id="monitor-error-message" dir="ltr">{{ monitor_error or "" }}</span>
       </section>
 
+      <section class="usage-section" aria-label="{{ t.usage_title }}">
+        <article class="usage-card">
+          <div class="usage-card-heading">
+            <div>
+              <span class="section-kicker">{{ t.usage_title }}</span>
+              <h2>{{ t.monitor_usage }}</h2>
+            </div>
+            <span class="usage-window">{{ t.last_minute }}</span>
+          </div>
+          <div class="usage-values">
+            <div>
+              <span>{{ t.cpu_usage }}</span>
+              <strong><span id="monitor-cpu">{{ usage.current.monitor_cpu }}</span>%</strong>
+            </div>
+            <div>
+              <span>{{ t.memory_usage }}</span>
+              <strong><span id="monitor-memory">{{ usage.current.monitor_memory_mb }}</span> MB</strong>
+            </div>
+          </div>
+          <svg class="usage-chart" viewBox="0 0 300 82" preserveAspectRatio="none" role="img" aria-label="{{ t.monitor_usage }}">
+            <defs>
+              <linearGradient id="monitor-area-gradient" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#38bdf8" stop-opacity="0.3"></stop>
+                <stop offset="100%" stop-color="#38bdf8" stop-opacity="0"></stop>
+              </linearGradient>
+            </defs>
+            <path id="monitor-cpu-area" class="chart-area monitor-area" d=""></path>
+            <polyline id="monitor-cpu-line" class="chart-line monitor-line" points=""></polyline>
+          </svg>
+        </article>
+
+        <article class="usage-card">
+          <div class="usage-card-heading">
+            <div>
+              <span class="section-kicker">{{ t.usage_title }}</span>
+              <h2>{{ t.system_usage }}</h2>
+            </div>
+            <span class="usage-window">{{ t.last_minute }}</span>
+          </div>
+          <div class="usage-values">
+            <div>
+              <span>{{ t.cpu_usage }}</span>
+              <strong><span id="system-cpu">{{ usage.current.system_cpu }}</span>%</strong>
+            </div>
+            <div>
+              <span>{{ t.memory_usage }}</span>
+              <strong><span id="system-memory">{{ usage.current.system_memory }}</span>%</strong>
+            </div>
+            <div>
+              <span>{{ t.load_average }}</span>
+              <strong id="load-average">{{ usage.current.load_average }}</strong>
+            </div>
+          </div>
+          <svg class="usage-chart" viewBox="0 0 300 82" preserveAspectRatio="none" role="img" aria-label="{{ t.system_usage }}">
+            <polyline id="system-memory-line" class="chart-line memory-line" points=""></polyline>
+            <polyline id="system-cpu-line" class="chart-line system-line" points=""></polyline>
+          </svg>
+          <div class="chart-legend">
+            <span><i class="legend-dot system-dot"></i>{{ t.cpu_usage }}</span>
+            <span><i class="legend-dot memory-dot"></i>{{ t.memory_usage }}</span>
+          </div>
+        </article>
+      </section>
+
       <section class="stats-grid" aria-label="{{ t.stats_label }}">
         <article class="stat-card">
           <span class="stat-label">{{ t.total_events }}</span>

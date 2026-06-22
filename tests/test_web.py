@@ -6,6 +6,7 @@ import unittest
 
 import web.app as dashboard
 from user.models import EventStore, ExecEvent
+from user.usage import UsageSampler
 
 
 class DashboardTests(unittest.TestCase):
@@ -13,6 +14,7 @@ class DashboardTests(unittest.TestCase):
         dashboard.event_store = EventStore()
         dashboard.monitor_error = None
         dashboard.monitor_status = "active"
+        dashboard.usage_sampler = UsageSampler(minimum_interval=0)
         self.client = dashboard.app.test_client()
 
     def add_exited_event(self) -> ExecEvent:
@@ -52,6 +54,9 @@ class DashboardTests(unittest.TestCase):
         self.assertIn(b"background-aurora", response.data)
         self.assertIn(b"background-grid", response.data)
         self.assertIn(b"background-particles", response.data)
+        self.assertIn("مصرف پایشگر".encode(), response.data)
+        self.assertIn(b"monitor-cpu-line", response.data)
+        self.assertIn(b"system-cpu-line", response.data)
 
     def test_english_dashboard_uses_ltr_translations(self) -> None:
         response = self.client.get("/?lang=en")
@@ -87,6 +92,25 @@ class DashboardTests(unittest.TestCase):
             self.assertIn(b"is-status-change", response.data)
             self.assertIn(b"language-leaving", response.data)
             self.assertIn(b"window.location.assign", response.data)
+            self.assertIn(b"updateUsage", response.data)
+            self.assertIn(b"chartPoints", response.data)
+        finally:
+            response.close()
+
+    def test_css_keeps_modal_viewport_fixed_and_updates_layout_stable(self) -> None:
+        response = self.client.get("/static/style.css")
+
+        try:
+            css = response.get_data(as_text=True)
+            self.assertIn("animation: section-enter 380ms ease-in-out backwards", css)
+            self.assertIn(".process-details[open]", css)
+            self.assertIn("position: fixed", css)
+            self.assertIn("will-change: color, filter, text-shadow", css)
+            value_animation = css.split("@keyframes value-pop", 1)[1].split(
+                "@keyframes section-enter",
+                1,
+            )[0]
+            self.assertNotIn("scale(", value_animation)
         finally:
             response.close()
 
@@ -101,6 +125,9 @@ class DashboardTests(unittest.TestCase):
         self.assertEqual(payload["monitor_error"], None)
         self.assertIn("event_rate", payload["monitor_metrics"])
         self.assertIn("lost_events", payload["monitor_metrics"])
+        self.assertIn("monitor_cpu", payload["usage"]["current"])
+        self.assertIn("system_cpu", payload["usage"]["current"])
+        self.assertGreaterEqual(len(payload["usage"]["history"]), 1)
         self.assertEqual(payload["stats"]["running_processes"], 0)
         self.assertEqual(payload["stats"]["exited_processes"], 1)
         self.assertEqual(payload["events"][0]["pid"], event.pid)

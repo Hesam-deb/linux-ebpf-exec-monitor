@@ -175,6 +175,12 @@ The “eBPF pipeline load” panel reports:
 
 These values measure the event pipeline. They do not claim to measure the exact CPU cost of the kernel eBPF instructions.
 
+Two live charts at the top show:
+
+- monitor-process CPU usage and resident memory;
+- host CPU usage, memory usage, and one-minute load average;
+- a rolling history of the latest 60 samples.
+
 ## What “process activity” means
 
 The monitor now follows each captured process from successful execution to exit. It tells you who launched it, its parent, how it was invoked, how long it ran, and how it ended.

@@ -55,6 +55,49 @@
     return value === null || value === undefined || value === "" ? t.not_available : value;
   }
 
+  function chartPoints(values, maxValue = 100) {
+    if (values.length === 0) return "";
+    const width = 300;
+    const height = 72;
+    const denominator = Math.max(1, values.length - 1);
+    return values
+      .map((value, index) => {
+        const x = (index / denominator) * width;
+        const y = height - Math.min(maxValue, Math.max(0, value)) / maxValue * height + 5;
+        return `${x.toFixed(1)},${y.toFixed(1)}`;
+      })
+      .join(" ");
+  }
+
+  function areaPath(points) {
+    if (!points) return "";
+    const pairs = points.split(" ");
+    return `M ${pairs[0]} L ${pairs.slice(1).join(" L ")} L 300,82 L 0,82 Z`;
+  }
+
+  function updateUsage(usage) {
+    const current = usage.current;
+    updateText("monitor-cpu", current.monitor_cpu);
+    updateText("monitor-memory", current.monitor_memory_mb);
+    updateText("system-cpu", current.system_cpu);
+    updateText("system-memory", current.system_memory);
+    updateText("load-average", current.load_average);
+
+    const monitorValues = usage.history.map((sample) => sample.monitor_cpu);
+    const monitorMax = Math.max(100, ...monitorValues);
+    const monitorPoints = chartPoints(monitorValues, monitorMax);
+    document.getElementById("monitor-cpu-line").setAttribute("points", monitorPoints);
+    document.getElementById("monitor-cpu-area").setAttribute("d", areaPath(monitorPoints));
+    document.getElementById("system-cpu-line").setAttribute(
+      "points",
+      chartPoints(usage.history.map((sample) => sample.system_cpu)),
+    );
+    document.getElementById("system-memory-line").setAttribute(
+      "points",
+      chartPoints(usage.history.map((sample) => sample.system_memory)),
+    );
+  }
+
   function detailItem(label, value, wide = false) {
     const wrapper = element("div", wide ? "detail-wide" : "");
     wrapper.append(element("dt", "", label));
@@ -205,6 +248,7 @@
     bufferHealth.className = `buffer-health ${
       metrics.buffer_healthy ? "buffer-healthy" : "buffer-degraded"
     }`;
+    updateUsage(payload.usage);
     updateMonitor(payload);
 
     const currentIds = new Set(payload.events.map((event) => event.event_id));

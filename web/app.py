@@ -17,6 +17,7 @@ if str(PROJECT_ROOT) not in sys.path:
 
 from user.loader import ExecMonitor  # noqa: E402
 from user.models import EventStore  # noqa: E402
+from user.usage import UsageSampler  # noqa: E402
 
 logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
 LOGGER = logging.getLogger(__name__)
@@ -24,6 +25,7 @@ LOGGER = logging.getLogger(__name__)
 app = Flask(__name__)
 event_store = EventStore(max_events=100)
 monitor = ExecMonitor(event_store)
+usage_sampler = UsageSampler()
 monitor_error: str | None = None
 monitor_status = "starting"
 
@@ -70,6 +72,13 @@ TRANSLATIONS = {
         "buffer_health": "سلامت بافر",
         "buffer_healthy": "سالم",
         "buffer_degraded": "دارای افت",
+        "usage_title": "مصرف زنده",
+        "monitor_usage": "مصرف پایشگر",
+        "system_usage": "مصرف سیستم",
+        "cpu_usage": "پردازنده",
+        "memory_usage": "حافظه",
+        "load_average": "میانگین بار",
+        "last_minute": "۶۰ نمونهٔ اخیر",
         "event_stream": "جریان رویدادها",
         "latest_processes": "آخرین پردازش‌های اجراشده",
         "view_json": "مشاهدهٔ خروجی JSON",
@@ -139,6 +148,13 @@ TRANSLATIONS = {
         "buffer_health": "Buffer health",
         "buffer_healthy": "Healthy",
         "buffer_degraded": "Dropping events",
+        "usage_title": "Live usage",
+        "monitor_usage": "Monitor usage",
+        "system_usage": "System usage",
+        "cpu_usage": "CPU",
+        "memory_usage": "Memory",
+        "load_average": "Load average",
+        "last_minute": "Latest 60 samples",
         "event_stream": "Event stream",
         "latest_processes": "Latest executed processes",
         "view_json": "View JSON output",
@@ -207,6 +223,7 @@ def index() -> str:
         monitor_error=monitor_error,
         monitor_status=monitor_status,
         monitor_metrics=monitor.metrics(),
+        usage=usage_sampler.snapshot(),
         language=language,
         alternate_language="en" if language == "fa" else "fa",
         t=translations,
@@ -223,6 +240,7 @@ def api_events() -> Any:
             "monitor_error": monitor_error,
             "monitor_status": monitor_status,
             "monitor_metrics": monitor.metrics(),
+            "usage": usage_sampler.snapshot(),
         }
     )
 

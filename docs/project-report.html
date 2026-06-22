@@ -109,7 +109,7 @@
     <tr><td>Identity</td><td>Capture PID, parent PID, UID, and resolve the local user name.</td></tr>
     <tr><td>Invocation</td><td>Read executable path and command-line arguments from <code>/proc/&lt;pid&gt;</code> on a best-effort basis.</td></tr>
     <tr><td>Lifecycle</td><td>Correlate start and exit events, calculate duration, and decode exit code or terminating signal.</td></tr>
-    <tr><td>Dashboard</td><td>Responsive dark UI, Persian and English languages, RTL/LTR layouts, live one-second polling, persistent expanded details, eBPF pipeline-load metrics, and JSON output.</td></tr>
+    <tr><td>Dashboard</td><td>Responsive dark UI, Persian and English languages, RTL/LTR layouts, live one-second polling, persistent expanded details, eBPF pipeline-load metrics, monitor/host usage charts, and JSON output.</td></tr>
     <tr><td>Documentation</td><td>Friendly English and Persian READMEs with HTTPS/SSH clone addresses, requirements, installation, troubleshooting, and limitations.</td></tr>
     <tr><td>Quality</td><td>Automated model and Flask tests for lifecycle correlation, serialization, translations, and API behavior.</td></tr>
   </table>
@@ -152,6 +152,13 @@ Flask dashboard   JSON API</pre>
     events, and buffer health. These values measure event-pipeline pressure rather
     than claiming to measure exact kernel instruction CPU cost. Data updates without
     a page reload, so expanded process details remain open.
+  </p>
+
+  <h3>Monitor and host usage</h3>
+  <p>
+    Two rolling charts use Linux procfs data to display monitor CPU and resident
+    memory alongside host CPU, memory, and one-minute load average. The dashboard
+    keeps the latest 60 samples.
   </p>
 
   <div class="note">
@@ -208,6 +215,7 @@ sudo ./scripts/run.sh</pre>
       <li>داشبورد واکنش‌گرا با زبان فارسی و انگلیسی، حالت RTL/LTR و به‌روزرسانی زندهٔ یک‌ثانیه‌ای</li>
       <li>جزئیات بازشونده برای هر پردازش و خروجی JSON</li>
       <li>حفظ پنل جزئیات بازشده و نمایش نرخ رویداد، رویدادهای ازدست‌رفته و سلامت perf buffer</li>
+      <li>نمودار زندهٔ مصرف CPU و حافظهٔ پایشگر و سیستم با تاریخچهٔ ۶۰ نمونه</li>
       <li>آزمون‌های خودکار برای مدل، API و رابط دوزبانه</li>
     </ul>
 
@@ -235,6 +243,13 @@ sudo ./scripts/run.sh</pre>
       ازدست‌رفته و سلامت perf buffer را نشان می‌دهد. این معیارها فشار خط لولهٔ
       رویداد را اندازه می‌گیرند، نه مصرف دقیق CPU دستورهای eBPF در هسته.
       به‌روزرسانی بدون بارگذاری دوبارهٔ صفحه انجام می‌شود و جزئیات باز می‌مانند.
+    </p>
+
+    <h3>مصرف پایشگر و سیستم</h3>
+    <p>
+      دو نمودار زنده با استفاده از اطلاعات procfs، مصرف CPU و حافظهٔ پایشگر و
+      همچنین CPU، حافظه و میانگین بار یک‌دقیقه‌ای سیستم را نمایش می‌دهند.
+      تاریخچهٔ ۶۰ نمونهٔ اخیر نگهداری می‌شود.
     </p>
 
     <div class="note">
