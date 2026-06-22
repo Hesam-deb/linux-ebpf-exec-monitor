@@ -10,6 +10,9 @@
   const openStorageKey = "ebpf-monitor-open-details";
   let selectedEventId = sessionStorage.getItem(openStorageKey);
   let requestInFlight = false;
+  let knownEventIds = new Set(
+    [...eventsBody.querySelectorAll("tr[data-event-id]")].map((row) => row.dataset.eventId),
+  );
 
   const text = (value) => document.createTextNode(String(value));
 
@@ -18,6 +21,17 @@
     if (className) node.className = className;
     if (value !== undefined && value !== null) node.append(text(value));
     return node;
+  }
+
+  function updateText(id, value, animate = true) {
+    const node = document.getElementById(id);
+    const nextValue = String(value);
+    if (node.textContent === nextValue) return;
+    node.textContent = nextValue;
+    if (!animate) return;
+    node.classList.remove("value-pop");
+    void node.offsetWidth;
+    node.classList.add("value-pop");
   }
 
   function technicalValue(value) {
@@ -42,10 +56,14 @@
 
   function bindDetails(details) {
     details.open = details.dataset.eventId === selectedEventId;
-    if (details.open) document.body.classList.add("detail-overlay-open");
+    if (details.open) {
+      details.classList.add("restored-selection");
+      document.body.classList.add("detail-overlay-open");
+    }
 
     details.addEventListener("toggle", () => {
       if (details.open) {
+        details.classList.remove("restored-selection");
         document.querySelectorAll(".process-details[open]").forEach((other) => {
           if (other !== details) other.open = false;
         });
@@ -67,6 +85,7 @@
   function processRow(event) {
     const row = document.createElement("tr");
     row.dataset.eventId = event.event_id;
+    if (!knownEventIds.has(event.event_id)) row.classList.add("is-new-event");
 
     const commandCell = document.createElement("td");
     commandCell.append(element("span", "command-cell technical-value", event.command));
@@ -150,19 +169,18 @@
 
   function updateDashboard(payload) {
     const stats = payload.stats;
-    document.getElementById("total-events").textContent = stats.total_events;
-    document.getElementById("retained-events").textContent = stats.retained_events;
-    document.getElementById("max-events").textContent = stats.max_events;
-    document.getElementById("running-processes").textContent = stats.running_processes;
-    document.getElementById("last-update").textContent =
-      stats.retained_events === 0 ? t.waiting : stats.last_update;
-    document.getElementById("latest-command").textContent = stats.latest_command;
+    updateText("total-events", stats.total_events);
+    updateText("retained-events", stats.retained_events);
+    updateText("max-events", stats.max_events, false);
+    updateText("running-processes", stats.running_processes);
+    updateText("last-update", stats.retained_events === 0 ? t.waiting : stats.last_update, false);
+    updateText("latest-command", stats.latest_command);
     const metrics = payload.monitor_metrics;
-    document.getElementById("event-rate").textContent = metrics.event_rate;
-    document.getElementById("kernel-events").textContent = metrics.kernel_events;
-    document.getElementById("exec-events").textContent = metrics.exec_events;
-    document.getElementById("exit-events").textContent = metrics.exit_events;
-    document.getElementById("lost-events").textContent = metrics.lost_events;
+    updateText("event-rate", metrics.event_rate);
+    updateText("kernel-events", metrics.kernel_events);
+    updateText("exec-events", metrics.exec_events);
+    updateText("exit-events", metrics.exit_events);
+    updateText("lost-events", metrics.lost_events);
     const bufferHealth = document.getElementById("buffer-health");
     bufferHealth.textContent = metrics.buffer_healthy ? t.buffer_healthy : t.buffer_degraded;
     bufferHealth.className = `buffer-health ${
@@ -177,6 +195,7 @@
     if (payload.events.length === 0) fragment.append(emptyRow());
     else payload.events.forEach((event) => fragment.append(processRow(event)));
     eventsBody.replaceChildren(fragment);
+    knownEventIds = currentIds;
   }
 
   async function poll() {

@@ -36,6 +36,7 @@ body {
   opacity: 0.12;
   filter: blur(80px);
   pointer-events: none;
+  animation: glow-drift 14s ease-in-out infinite alternate;
 }
 
 .background-glow-one {
@@ -48,6 +49,7 @@ body {
   bottom: -10rem;
   left: -8rem;
   background: #8b5cf6;
+  animation-delay: -7s;
 }
 
 .dashboard-shell {
@@ -74,14 +76,17 @@ body {
   border-radius: 999px;
   background: var(--primary-soft);
   color: #bae6fd;
-  font-family: "Vazirmatn", Tahoma, sans-serif;
+  font-family: inherit;
   font-weight: 600;
   text-decoration: none;
+  transition: transform 180ms ease, background 180ms ease, border-color 180ms ease;
 }
 
 .language-switch:hover {
   border-color: rgba(56, 189, 248, 0.45);
+  background: rgba(56, 189, 248, 0.18);
   color: #e0f2fe;
+  transform: translateY(-2px);
 }
 
 .hero {
@@ -107,6 +112,10 @@ h1 {
   font-size: clamp(2rem, 5vw, 3.5rem);
   font-weight: 800;
   line-height: 1.25;
+  background: linear-gradient(100deg, #f8fafc 15%, #bae6fd 60%, #c4b5fd);
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
 }
 
 .hero-description {
@@ -130,6 +139,7 @@ h1 {
   color: #a7f3d0;
   font-size: 0.82rem;
   font-weight: 600;
+  transition: background 200ms ease, border-color 200ms ease, color 200ms ease;
 }
 
 .monitor-badge-error {
@@ -150,6 +160,10 @@ h1 {
   border-radius: 50%;
   background: var(--success);
   box-shadow: 0 0 0 0.3rem rgba(52, 211, 153, 0.1);
+}
+
+.monitor-badge-active .status-dot {
+  animation: status-pulse 2.2s ease-out infinite;
 }
 
 .monitor-badge-error .status-dot {
@@ -192,6 +206,13 @@ h1 {
   border-radius: 16px;
   background: linear-gradient(145deg, rgba(18, 40, 64, 0.92), var(--surface));
   box-shadow: 0 18px 50px rgba(2, 8, 23, 0.2);
+  transition: transform 220ms ease, border-color 220ms ease, box-shadow 220ms ease;
+}
+
+.stat-card:hover {
+  border-color: rgba(56, 189, 248, 0.28);
+  box-shadow: 0 22px 58px rgba(2, 8, 23, 0.32);
+  transform: translateY(-4px);
 }
 
 .stat-label,
@@ -242,6 +263,11 @@ h1 {
   min-width: 0;
   padding: 0.9rem 1rem;
   background: rgba(9, 22, 38, 0.96);
+  transition: background 180ms ease;
+}
+
+.info-strip > div:hover {
+  background: rgba(15, 36, 58, 0.98);
 }
 
 .info-strip strong {
@@ -269,6 +295,12 @@ h1 {
   border: 1px solid var(--border);
   border-radius: 16px;
   background: linear-gradient(145deg, rgba(10, 30, 48, 0.96), rgba(9, 22, 38, 0.9));
+  transition: border-color 220ms ease, box-shadow 220ms ease;
+}
+
+.load-panel:hover {
+  border-color: rgba(56, 189, 248, 0.24);
+  box-shadow: 0 18px 45px rgba(2, 8, 23, 0.22);
 }
 
 .load-heading {
@@ -316,6 +348,12 @@ h1 {
   border: 1px solid rgba(148, 163, 184, 0.1);
   border-radius: 10px;
   background: rgba(4, 13, 25, 0.32);
+  transition: transform 180ms ease, background 180ms ease;
+}
+
+.load-grid > div:hover {
+  background: rgba(15, 37, 59, 0.52);
+  transform: translateY(-2px);
 }
 
 .load-grid span {
@@ -349,6 +387,7 @@ h1 {
   border-radius: 18px;
   background: var(--surface);
   box-shadow: 0 24px 60px rgba(2, 8, 23, 0.25);
+  transition: border-color 220ms ease, box-shadow 220ms ease;
 }
 
 .section-heading {
@@ -413,11 +452,20 @@ h1 {
 }
 
 .events-table tbody tr {
-  transition: background 120ms ease;
+  transition: background 150ms ease, box-shadow 150ms ease;
 }
 
 .events-table tbody tr:hover {
   background: rgba(56, 189, 248, 0.045);
+  box-shadow: inset 3px 0 0 rgba(56, 189, 248, 0.45);
+}
+
+html[dir="rtl"] .events-table tbody tr:hover {
+  box-shadow: inset -3px 0 0 rgba(56, 189, 248, 0.45);
+}
+
+.events-table tbody tr.is-new-event {
+  animation: row-arrive 520ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .events-table tbody tr:last-child td {
@@ -446,6 +494,7 @@ h1 {
 .process-status-running {
   background: rgba(52, 211, 153, 0.1);
   color: #a7f3d0;
+  animation: running-breathe 2.5s ease-in-out infinite;
 }
 
 .process-status-exited {
@@ -498,6 +547,7 @@ h1 {
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
   white-space: normal;
+  animation: backdrop-in 180ms ease-out;
 }
 
 .process-details[open] summary {
@@ -508,6 +558,11 @@ h1 {
   border-radius: 14px 14px 0 0;
   background: #10243a;
   box-shadow: 0 -12px 45px rgba(0, 0, 0, 0.3);
+}
+
+.process-details[open]:not(.restored-selection) summary,
+.process-details[open]:not(.restored-selection) dl {
+  animation: modal-rise 220ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .process-details[open] summary::after {
@@ -606,7 +661,67 @@ html[dir="ltr"] .technical-value {
 }
 
 html[dir="ltr"] body {
-  font-family: Inter, "Vazirmatn", system-ui, sans-serif;
+  font-family: "Vazirmatn", Inter, system-ui, sans-serif;
+}
+
+.value-pop {
+  animation: value-pop 360ms ease-out;
+}
+
+.top-nav,
+.hero,
+.stats-grid,
+.info-strip,
+.load-panel,
+.events-panel {
+  animation: section-enter 500ms both;
+}
+
+.hero { transition-delay: 60ms; }
+.stats-grid { transition-delay: 110ms; }
+.info-strip { transition-delay: 160ms; }
+.load-panel { transition-delay: 210ms; }
+.events-panel { transition-delay: 260ms; }
+
+@keyframes glow-drift {
+  from { transform: translate3d(-2%, -2%, 0) scale(0.95); }
+  to { transform: translate3d(8%, 6%, 0) scale(1.08); }
+}
+
+@keyframes status-pulse {
+  0% { box-shadow: 0 0 0 0 rgba(52, 211, 153, 0.35); }
+  70%, 100% { box-shadow: 0 0 0 0.55rem rgba(52, 211, 153, 0); }
+}
+
+@keyframes running-breathe {
+  0%, 100% { filter: brightness(1); }
+  50% { filter: brightness(1.22); }
+}
+
+@keyframes row-arrive {
+  from { opacity: 0; transform: translateY(-8px); background: rgba(56, 189, 248, 0.14); }
+  to { opacity: 1; transform: translateY(0); background: transparent; }
+}
+
+@keyframes backdrop-in {
+  from { background: rgba(2, 8, 23, 0); backdrop-filter: blur(0); }
+  to { background: rgba(2, 8, 23, 0.62); backdrop-filter: blur(10px); }
+}
+
+@keyframes modal-rise {
+  from { opacity: 0; transform: translateY(18px) scale(0.97); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes value-pop {
+  0% { color: #fff; transform: scale(1); }
+  45% { color: #7dd3fc; transform: scale(1.08); }
+  100% { color: inherit; transform: scale(1); }
+}
+
+@keyframes section-enter {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 footer {
@@ -673,5 +788,16 @@ footer {
 
   .process-details .detail-wide {
     grid-column: auto;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
   }
 }

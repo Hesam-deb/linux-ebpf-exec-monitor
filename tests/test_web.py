@@ -47,6 +47,8 @@ class DashboardTests(unittest.TestCase):
         self.assertNotIn(b'http-equiv="refresh"', response.data)
         self.assertIn(b"dashboard.js", response.data)
         self.assertIn("بار خط لولهٔ eBPF".encode(), response.data)
+        self.assertIn(b"fonts.googleapis.com", response.data)
+        self.assertIn(b"family=Vazirmatn", response.data)
 
     def test_english_dashboard_uses_ltr_translations(self) -> None:
         response = self.client.get("/?lang=en")
@@ -75,6 +77,9 @@ class DashboardTests(unittest.TestCase):
             self.assertIn(b"details.dataset.eventId === selectedEventId", response.data)
             self.assertIn(b'event.key === "Escape"', response.data)
             self.assertIn(b"detail-overlay-open", response.data)
+            self.assertIn(b"knownEventIds", response.data)
+            self.assertIn(b"is-new-event", response.data)
+            self.assertIn(b"value-pop", response.data)
         finally:
             response.close()
 
