@@ -72,7 +72,9 @@ class DashboardTests(unittest.TestCase):
             self.assertEqual(response.status_code, 200)
             self.assertIn(b"window.setInterval(poll", response.data)
             self.assertIn(b"sessionStorage.setItem", response.data)
-            self.assertIn(b"details.open = openEventIds.has", response.data)
+            self.assertIn(b"details.dataset.eventId === selectedEventId", response.data)
+            self.assertIn(b'event.key === "Escape"', response.data)
+            self.assertIn(b"detail-overlay-open", response.data)
         finally:
             response.close()
 

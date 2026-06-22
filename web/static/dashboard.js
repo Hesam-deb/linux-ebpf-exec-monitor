@@ -8,13 +8,7 @@
   const t = config.translations;
   const eventsBody = document.getElementById("events-body");
   const openStorageKey = "ebpf-monitor-open-details";
-  let storedOpenEventIds = [];
-  try {
-    storedOpenEventIds = JSON.parse(sessionStorage.getItem(openStorageKey) || "[]");
-  } catch {
-    sessionStorage.removeItem(openStorageKey);
-  }
-  let openEventIds = new Set(storedOpenEventIds);
+  let selectedEventId = sessionStorage.getItem(openStorageKey);
   let requestInFlight = false;
 
   const text = (value) => document.createTextNode(String(value));
@@ -35,6 +29,39 @@
     wrapper.append(element("dt", "", label));
     wrapper.append(element("dd", "technical-value", technicalValue(value)));
     return wrapper;
+  }
+
+  function closeSelectedDetails() {
+    document.querySelectorAll(".process-details[open]").forEach((details) => {
+      details.open = false;
+    });
+    selectedEventId = null;
+    sessionStorage.removeItem(openStorageKey);
+    document.body.classList.remove("detail-overlay-open");
+  }
+
+  function bindDetails(details) {
+    details.open = details.dataset.eventId === selectedEventId;
+    if (details.open) document.body.classList.add("detail-overlay-open");
+
+    details.addEventListener("toggle", () => {
+      if (details.open) {
+        document.querySelectorAll(".process-details[open]").forEach((other) => {
+          if (other !== details) other.open = false;
+        });
+        selectedEventId = details.dataset.eventId;
+        sessionStorage.setItem(openStorageKey, selectedEventId);
+        document.body.classList.add("detail-overlay-open");
+      } else if (selectedEventId === details.dataset.eventId) {
+        selectedEventId = null;
+        sessionStorage.removeItem(openStorageKey);
+        document.body.classList.remove("detail-overlay-open");
+      }
+    });
+
+    details.addEventListener("click", (event) => {
+      if (event.target === details) closeSelectedDetails();
+    });
   }
 
   function processRow(event) {
@@ -67,12 +94,6 @@
     const detailsCell = document.createElement("td");
     const details = element("details", "process-details");
     details.dataset.eventId = event.event_id;
-    details.open = openEventIds.has(event.event_id);
-    details.addEventListener("toggle", () => {
-      if (details.open) openEventIds.add(event.event_id);
-      else openEventIds.delete(event.event_id);
-      sessionStorage.setItem(openStorageKey, JSON.stringify([...openEventIds]));
-    });
     details.append(element("summary", "", t.details));
 
     const list = document.createElement("dl");
@@ -86,6 +107,7 @@
     list.append(detailItem(t.executable, event.executable, true));
     list.append(detailItem(t.arguments, event.arguments, true));
     details.append(list);
+    bindDetails(details);
     detailsCell.append(details);
     row.append(detailsCell);
 
@@ -149,8 +171,7 @@
     updateMonitor(payload);
 
     const currentIds = new Set(payload.events.map((event) => event.event_id));
-    openEventIds = new Set([...openEventIds].filter((eventId) => currentIds.has(eventId)));
-    sessionStorage.setItem(openStorageKey, JSON.stringify([...openEventIds]));
+    if (selectedEventId && !currentIds.has(selectedEventId)) closeSelectedDetails();
 
     const fragment = document.createDocumentFragment();
     if (payload.events.length === 0) fragment.append(emptyRow());
@@ -176,12 +197,11 @@
   }
 
   document.querySelectorAll(".process-details").forEach((details) => {
-    if (openEventIds.has(details.dataset.eventId)) details.open = true;
-    details.addEventListener("toggle", () => {
-      if (details.open) openEventIds.add(details.dataset.eventId);
-      else openEventIds.delete(details.dataset.eventId);
-      sessionStorage.setItem(openStorageKey, JSON.stringify([...openEventIds]));
-    });
+    bindDetails(details);
+  });
+
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape") closeSelectedDetails();
   });
 
   document.addEventListener("visibilitychange", () => {
