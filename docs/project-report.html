@@ -1,0 +1,221 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Linux eBPF Process Lifecycle Monitor — Project Report</title>
+  <style>
+    @page { size: A4; margin: 18mm; }
+    body {
+      color: #172033;
+      font-family: "DejaVu Sans", "Vazirmatn", sans-serif;
+      font-size: 10.5pt;
+      line-height: 1.65;
+    }
+    h1 { color: #075985; font-size: 24pt; margin-bottom: 4pt; }
+    h2 {
+      margin-top: 22pt;
+      padding-bottom: 4pt;
+      border-bottom: 1px solid #bae6fd;
+      color: #0369a1;
+      font-size: 16pt;
+    }
+    h3 { color: #0f4c6e; font-size: 12pt; }
+    .subtitle { color: #52657a; font-size: 12pt; }
+    .meta, .note {
+      padding: 10pt;
+      border: 1px solid #bae6fd;
+      border-radius: 6pt;
+      background: #f0f9ff;
+    }
+    code {
+      color: #075985;
+      font-family: "DejaVu Sans Mono", monospace;
+      font-size: 9pt;
+    }
+    pre {
+      padding: 10pt;
+      border-radius: 6pt;
+      background: #0f172a;
+      color: #e2e8f0;
+      font-family: "DejaVu Sans Mono", monospace;
+      font-size: 8.5pt;
+      line-height: 1.45;
+      white-space: pre-wrap;
+    }
+    table { width: 100%; border-collapse: collapse; margin: 10pt 0; }
+    th, td { padding: 7pt; border: 1px solid #cbd5e1; vertical-align: top; }
+    th { background: #e0f2fe; color: #0c4a6e; }
+    .fa {
+      direction: rtl;
+      text-align: right;
+      font-family: "Vazirmatn", "DejaVu Sans", sans-serif;
+    }
+    .page-break { page-break-before: always; }
+    footer { margin-top: 24pt; color: #64748b; font-size: 8.5pt; text-align: center; }
+  </style>
+</head>
+<body>
+  <h1>Linux eBPF Process Lifecycle Monitor</h1>
+  <div class="subtitle">Bilingual project report / گزارش دوزبانهٔ پروژه</div>
+  <p class="meta">
+    Repository: <code>https://github.com/Hesam-deb/linux-ebpf-exec-monitor</code><br>
+    Report date: June 22, 2026<br>
+    Stack: Linux eBPF, BCC, Python, Flask, HTML/CSS
+  </p>
+
+  <h2>1. Project objective</h2>
+  <p>
+    The project started as a small execution monitor that reported PID, command name,
+    and timestamp. It has been expanded into a process lifecycle monitor with a
+    bilingual Persian/English dashboard and a documented installation workflow.
+  </p>
+
+  <h2>2. What was implemented</h2>
+  <table>
+    <tr><th>Area</th><th>Completed work</th></tr>
+    <tr><td>Kernel monitoring</td><td>Capture successful process execution and process exit with <code>sched_process_exec</code> and <code>sched_process_exit</code>.</td></tr>
+    <tr><td>Identity</td><td>Capture PID, parent PID, UID, and resolve the local user name.</td></tr>
+    <tr><td>Invocation</td><td>Read executable path and command-line arguments from <code>/proc/&lt;pid&gt;</code> on a best-effort basis.</td></tr>
+    <tr><td>Lifecycle</td><td>Correlate start and exit events, calculate duration, and decode exit code or terminating signal.</td></tr>
+    <tr><td>Dashboard</td><td>Responsive dark UI, Persian and English languages, RTL/LTR layouts, status badges, statistics, expandable process details, and JSON output.</td></tr>
+    <tr><td>Documentation</td><td>Friendly English and Persian READMEs with HTTPS/SSH clone addresses, requirements, installation, troubleshooting, and limitations.</td></tr>
+    <tr><td>Quality</td><td>Automated model and Flask tests for lifecycle correlation, serialization, translations, and API behavior.</td></tr>
+  </table>
+
+  <h2>3. Architecture</h2>
+  <pre>Linux kernel
+  ├─ sched:sched_process_exec
+  └─ sched:sched_process_exit
+             │
+             ▼
+      BCC/eBPF perf buffer
+             │
+             ▼
+Python loader
+  ├─ resolves username
+  ├─ reads /proc/&lt;pid&gt;/exe
+  ├─ reads /proc/&lt;pid&gt;/cmdline
+  └─ decodes exit status
+             │
+             ▼
+Thread-safe lifecycle store
+             │
+       ┌─────┴─────┐
+       ▼           ▼
+Flask dashboard   JSON API</pre>
+
+  <h2>4. Process details now available</h2>
+  <ul>
+    <li>PID and parent PID (PPID)</li>
+    <li>UID and user name</li>
+    <li>Command name, executable path, and arguments</li>
+    <li>Running or exited status</li>
+    <li>Start time, exit time, and duration</li>
+    <li>Exit code or termination signal</li>
+  </ul>
+
+  <div class="note">
+    “What the process is doing” is intentionally scoped to lifecycle information.
+    Monitoring file access, network traffic, or every system call would require
+    additional probes, filtering, and higher-volume storage.
+  </div>
+
+  <h2>5. Running the project</h2>
+  <pre>git clone https://github.com/Hesam-deb/linux-ebpf-exec-monitor.git
+cd linux-ebpf-exec-monitor
+chmod +x scripts/install.sh scripts/run.sh
+./scripts/install.sh
+sudo ./scripts/run.sh</pre>
+  <p>
+    Persian dashboard: <code>http://127.0.0.1:5000</code><br>
+    English dashboard: <code>http://127.0.0.1:5000/?lang=en</code><br>
+    JSON API: <code>http://127.0.0.1:5000/api/events</code>
+  </p>
+
+  <h2>6. Requirements and constraints</h2>
+  <ul>
+    <li>Ubuntu 24.04 or a recent Ubuntu/Debian-based Linux distribution</li>
+    <li>Linux kernel 6.x or newer, matching kernel headers, BCC packages, Python 3, Flask 3.x, and root privileges</li>
+    <li>Windows and macOS require an Ubuntu virtual machine</li>
+    <li>Events are retained in memory and are lost when the application stops</li>
+    <li><code>/proc</code> enrichment can miss very short-lived processes</li>
+    <li>The dashboard is educational and has no authentication or TLS</li>
+  </ul>
+
+  <div class="page-break"></div>
+  <section class="fa" lang="fa">
+    <h1>گزارش پروژهٔ پایش چرخهٔ عمر پردازش‌ها با eBPF</h1>
+    <p class="meta">
+      مخزن: <code>https://github.com/Hesam-deb/linux-ebpf-exec-monitor</code><br>
+      تاریخ گزارش: ۲۲ ژوئن ۲۰۲۶<br>
+      فناوری‌ها: Linux eBPF، BCC، Python، Flask و HTML/CSS
+    </p>
+
+    <h2>۱. هدف پروژه</h2>
+    <p>
+      پروژه ابتدا یک پایشگر ساده برای نمایش PID، نام دستور و زمان اجرا بود.
+      اکنون به پایشگر چرخهٔ عمر پردازش تبدیل شده و داشبورد دوزبانهٔ فارسی/انگلیسی،
+      راهنمای نصب و API خروجی JSON دارد.
+    </p>
+
+    <h2>۲. قابلیت‌های اضافه‌شده</h2>
+    <ul>
+      <li>ثبت اجرای موفق و خروج پردازش با دو tracepoint هستهٔ لینوکس</li>
+      <li>ثبت PID، PPID و UID و تبدیل UID به نام کاربر</li>
+      <li>خواندن مسیر فایل اجرایی و آرگومان‌ها از <code>/proc</code></li>
+      <li>تطبیق رویداد شروع و پایان و محاسبهٔ مدت اجرا</li>
+      <li>نمایش کد خروج یا سیگنال پایان</li>
+      <li>داشبورد واکنش‌گرا با زبان فارسی و انگلیسی و حالت RTL/LTR</li>
+      <li>جزئیات بازشونده برای هر پردازش و خروجی JSON</li>
+      <li>آزمون‌های خودکار برای مدل، API و رابط دوزبانه</li>
+    </ul>
+
+    <h2>۳. مسیر داده</h2>
+    <p>
+      رویدادهای اجرا و خروج در هسته ثبت و از perf buffer به Python ارسال می‌شوند.
+      بارگذار Python اطلاعات کاربر و <code>/proc</code> را اضافه می‌کند. سپس حافظهٔ
+      thread-safe رویداد شروع و پایان را با PID تطبیق می‌دهد و Flask نتیجه را در
+      داشبورد و API نمایش می‌دهد.
+    </p>
+
+    <h2>۴. اطلاعات قابل مشاهده برای هر پردازش</h2>
+    <ul>
+      <li>PID و PID والد</li>
+      <li>نام کاربر و UID</li>
+      <li>نام دستور، مسیر فایل اجرایی و آرگومان‌ها</li>
+      <li>وضعیت در حال اجرا یا پایان‌یافته</li>
+      <li>زمان شروع، زمان پایان و مدت اجرا</li>
+      <li>کد خروج یا سیگنال پایان</li>
+    </ul>
+
+    <div class="note">
+      منظور از فعالیت پردازش در این نسخه، چرخهٔ عمر آن است. بررسی فایل‌ها،
+      شبکه و همهٔ system callها به probeهای جداگانه و زیرساخت ذخیره‌سازی
+      قوی‌تری نیاز دارد.
+    </div>
+
+    <h2>۵. اجرای پروژه</h2>
+    <pre>git clone https://github.com/Hesam-deb/linux-ebpf-exec-monitor.git
+cd linux-ebpf-exec-monitor
+chmod +x scripts/install.sh scripts/run.sh
+./scripts/install.sh
+sudo ./scripts/run.sh</pre>
+
+    <p>
+      داشبورد فارسی: <code>http://127.0.0.1:5000</code><br>
+      داشبورد انگلیسی: <code>http://127.0.0.1:5000/?lang=en</code><br>
+      API: <code>http://127.0.0.1:5000/api/events</code>
+    </p>
+
+    <h2>۶. محدودیت‌ها</h2>
+    <ul>
+      <li>پروژه آموزشی است و احراز هویت، TLS و ذخیره‌سازی دائمی ندارد.</li>
+      <li>اطلاعات <code>/proc</code> برای پردازش‌های بسیار کوتاه ممکن است از دست برود.</li>
+      <li>برای اجرا به Linux، BCC، هدرهای هسته و دسترسی root نیاز است.</li>
+      <li>پایش فایل و شبکه در این نسخه انجام نمی‌شود.</li>
+    </ul>
+  </section>
+
+  <footer>Linux eBPF Process Lifecycle Monitor — Bilingual Project Report</footer>
+</body>
+</html>

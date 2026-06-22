@@ -254,6 +254,11 @@ h1 {
   white-space: nowrap;
 }
 
+.tracepoint-value {
+  font-size: 0.7rem !important;
+  overflow-wrap: anywhere;
+}
+
 .events-panel {
   overflow: hidden;
   border: 1px solid var(--border);
@@ -344,6 +349,93 @@ h1 {
   background: rgba(56, 189, 248, 0.07);
   color: #bae6fd;
   font-weight: 600;
+}
+
+.process-status {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.25rem 0.55rem;
+  border-radius: 999px;
+  font-size: 0.7rem;
+  font-weight: 700;
+}
+
+.process-status-running {
+  background: rgba(52, 211, 153, 0.1);
+  color: #a7f3d0;
+}
+
+.process-status-exited {
+  background: rgba(148, 163, 184, 0.1);
+  color: #b8c5d3;
+}
+
+.user-cell {
+  display: block;
+  color: #d8e4ef;
+}
+
+.user-cell + small {
+  display: block;
+  margin-top: 0.15rem;
+  color: #70869b;
+  font-size: 0.65rem;
+}
+
+.process-details {
+  position: relative;
+}
+
+.process-details summary {
+  color: #7dd3fc;
+  cursor: pointer;
+  font-size: 0.75rem;
+  font-weight: 600;
+  list-style: none;
+}
+
+.process-details summary::-webkit-details-marker {
+  display: none;
+}
+
+.process-details[open] dl {
+  display: grid;
+}
+
+.process-details dl {
+  display: none;
+  grid-template-columns: repeat(2, minmax(10rem, 1fr));
+  gap: 0.8rem;
+  width: min(38rem, 75vw);
+  margin: 0.8rem 0 0;
+  padding: 1rem;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: #0b1b2e;
+  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.4);
+  white-space: normal;
+}
+
+.process-details dl div {
+  min-width: 0;
+}
+
+.process-details dt {
+  margin-bottom: 0.2rem;
+  color: var(--muted);
+  font-size: 0.66rem;
+  font-weight: 500;
+}
+
+.process-details dd {
+  margin: 0;
+  color: #d8e4ef;
+  font-size: 0.75rem;
+  overflow-wrap: anywhere;
+}
+
+.process-details .detail-wide {
+  grid-column: 1 / -1;
 }
 
 .pid-cell {

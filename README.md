@@ -1,8 +1,10 @@
-# Linux eBPF Process Execution Monitor
+# Linux eBPF Process Lifecycle Monitor
 
 > See what your Linux machine executes, live from the kernel.
 
 [راهنمای فارسی](README.fa.md)
+
+[Download the bilingual PDF project report](docs/project-report.pdf)
 
 This small educational project listens for successful process executions with eBPF and presents them in a clean Persian dashboard. It is a practical way to explore Linux tracepoints, BCC perf buffers, thread-safe event storage, and a Flask web interface without starting from a large observability stack.
 
@@ -11,8 +13,12 @@ This small educational project listens for successful process executions with eB
 Every time a program starts, the dashboard shows:
 
 - its command name;
-- its process ID (PID);
-- the local time at which the event was received;
+- its process ID (PID) and parent PID (PPID);
+- the user name and UID that executed it;
+- its executable path and command-line arguments when `/proc` enrichment succeeds;
+- whether it is running or has exited;
+- start time, end time, and running duration;
+- exit code or terminating signal;
 - total and unique command counts;
 - monitor health and in-memory retention information.
 
@@ -21,19 +27,20 @@ The page refreshes every two seconds and keeps the newest 100 events in memory.
 ## How it works
 
 ```text
-Linux tracepoint: sched:sched_process_exec
-                   │
-                   ▼
-            BCC/eBPF program
-                   │ perf buffer
-                   ▼
-           Python event loader
-                   │
-                   ▼
-       Thread-safe in-memory store
-                   │
-                   ▼
-          Persian Flask dashboard
+Linux tracepoints:
+  sched:sched_process_exec ──┐
+  sched:sched_process_exit ──┤
+                             ▼
+                      BCC/eBPF program
+                             │ perf buffer
+                             ▼
+            Python correlation + /proc enrichment
+                             │
+                             ▼
+                Thread-safe lifecycle store
+                             │
+                             ▼
+               Bilingual Flask dashboard
 ```
 
 ## Requirements
@@ -134,6 +141,16 @@ The current data is also available as JSON:
 http://127.0.0.1:5000/api/events
 ```
 
+Expand “Process details” on a dashboard row to inspect the PPID, UID, executable path, arguments, start/end timestamps, exit code, and termination signal.
+
+## What “process activity” means
+
+The monitor now follows each captured process from successful execution to exit. It tells you who launched it, its parent, how it was invoked, how long it ran, and how it ended.
+
+It does **not** trace every action performed inside the process. File opens, network connections, memory allocations, and individual system calls require separate probes and would generate substantially more data.
+
+Executable paths and arguments are read from `/proc/<pid>` immediately after the exec event. Very short-lived processes can disappear before enrichment finishes, so those fields may be unavailable even though the kernel lifecycle event was captured.
+
 ## Run the tests
 
 Tests do not load eBPF and do not require root:
@@ -173,6 +190,14 @@ sudo ./scripts/run.sh
 
 Make sure the monitor status is active, then execute a command in another terminal. The page updates every two seconds.
 
+### Verify that the lifecycle probes load
+
+Run this from the project directory:
+
+```bash
+sudo .venv/bin/python -c "from bcc import BPF; BPF(src_file='ebpf/exec_monitor.c'); print('eBPF lifecycle probes loaded')"
+```
+
 ## Project layout
 
 ```text
@@ -182,6 +207,7 @@ linux-ebpf-exec-monitor/
 ├── web/                   # Flask app, template, and styles
 ├── scripts/               # Installation and run helpers
 ├── tests/                 # Model and dashboard tests
+├── docs/                  # Bilingual HTML/PDF project report
 ├── requirements.txt       # Python dashboard dependency
 ├── README.md
 ├── README.fa.md
@@ -192,16 +218,18 @@ linux-ebpf-exec-monitor/
 
 This is a learning project, not a production security agent:
 
-- it records process execution only, not file, network, or login activity;
+- it records process execution and exit, not file, network, or login activity;
+- it tracks process exits and lifecycle outcomes, but not every internal action;
 - events are lost when the application stops;
 - only the newest 100 events are retained;
 - the dashboard has no authentication or TLS;
 - the command field is limited to Linux's task command length;
+- `/proc` enrichment is best effort for very short-lived processes;
 - no persistence, enrichment, alerting, or tamper protection is provided.
 
 ## Ideas for extending it
 
-- capture the executable path and parent PID;
+- add optional file and network activity probes;
 - add filters and search;
 - export events as CSV or JSON Lines;
 - stream updates with Server-Sent Events;

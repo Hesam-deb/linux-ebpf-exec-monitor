@@ -64,9 +64,9 @@
         </article>
 
         <article class="stat-card">
-          <span class="stat-label">{{ t.unique_commands }}</span>
-          <strong>{{ stats.unique_commands }}</strong>
-          <small>{{ t.window_help }}</small>
+          <span class="stat-label">{{ t.running_processes }}</span>
+          <strong>{{ stats.running_processes }}</strong>
+          <small>{{ t.running_help }}</small>
         </article>
 
         <article class="stat-card">
@@ -83,7 +83,7 @@
         </div>
         <div>
           <span class="info-label">{{ t.event_source }}</span>
-          <strong class="technical-value">sched_process_exec</strong>
+          <strong class="technical-value tracepoint-value">sched_process_exec + sched_process_exit</strong>
         </div>
         <div>
           <span class="info-label">{{ t.refresh_rate }}</span>
@@ -109,8 +109,11 @@
             <thead>
               <tr>
                 <th scope="col">{{ t.command }}</th>
+                <th scope="col">{{ t.status }}</th>
                 <th scope="col">{{ t.pid }}</th>
-                <th scope="col">{{ t.timestamp }}</th>
+                <th scope="col">{{ t.user }}</th>
+                <th scope="col">{{ t.duration }}</th>
+                <th scope="col">{{ t.details }}</th>
               </tr>
             </thead>
             <tbody>
@@ -119,12 +122,52 @@
                 <td>
                   <span class="command-cell technical-value">{{ event.command }}</span>
                 </td>
+                <td>
+                  <span class="process-status process-status-{{ event.status }}">
+                    {% if event.status == "running" %}{{ t.status_running }}{% else %}{{ t.status_exited }}{% endif %}
+                  </span>
+                </td>
                 <td class="technical-value pid-cell">{{ event.pid }}</td>
-                <td class="technical-value timestamp-cell">{{ event.timestamp }}</td>
+                <td>
+                  <span class="user-cell">{{ event.username }}</span>
+                  <small class="technical-value">UID {{ event.uid }}</small>
+                </td>
+                <td class="technical-value timestamp-cell">{{ event.duration }}</td>
+                <td>
+                  <details class="process-details">
+                    <summary>{{ t.details }}</summary>
+                    <dl>
+                      <div><dt>{{ t.pid }}</dt><dd class="technical-value">{{ event.pid }}</dd></div>
+                      <div><dt>{{ t.ppid }}</dt><dd class="technical-value">{{ event.ppid }}</dd></div>
+                      <div><dt>{{ t.uid }}</dt><dd class="technical-value">{{ event.uid }}</dd></div>
+                      <div><dt>{{ t.started_at }}</dt><dd class="technical-value">{{ event.timestamp }}</dd></div>
+                      <div>
+                        <dt>{{ t.finished_at }}</dt>
+                        <dd class="technical-value">{{ event.exit_timestamp or t.not_available }}</dd>
+                      </div>
+                      <div>
+                        <dt>{{ t.exit_code }}</dt>
+                        <dd class="technical-value">{{ event.exit_code if event.exit_code is not none else t.not_available }}</dd>
+                      </div>
+                      <div>
+                        <dt>{{ t.signal }}</dt>
+                        <dd class="technical-value">{{ event.signal if event.signal is not none else t.not_available }}</dd>
+                      </div>
+                      <div class="detail-wide">
+                        <dt>{{ t.executable }}</dt>
+                        <dd class="technical-value">{{ event.executable or t.not_available }}</dd>
+                      </div>
+                      <div class="detail-wide">
+                        <dt>{{ t.arguments }}</dt>
+                        <dd class="technical-value">{{ event.arguments or t.not_available }}</dd>
+                      </div>
+                    </dl>
+                  </details>
+                </td>
               </tr>
               {% else %}
               <tr>
-                <td colspan="3" class="empty-state">
+                <td colspan="6" class="empty-state">
                   <span class="empty-icon">⌁</span>
                   <strong>{{ t.empty_title }}</strong>
                   <small>{{ t.empty_help }} <code>ls</code> {{ t.or }} <code>whoami</code> {{ t.empty_suffix }}</small>
