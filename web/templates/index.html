@@ -154,7 +154,7 @@
             </thead>
             <tbody id="events-body">
               {% for event in events %}
-              <tr data-event-id="{{ event.event_id }}">
+              <tr data-event-id="{{ event.event_id }}" data-status="{{ event.status }}">
                 <td>
                   <span class="command-cell technical-value">{{ event.command }}</span>
                 </td>

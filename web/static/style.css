@@ -136,14 +136,19 @@ body {
   font-family: inherit;
   font-weight: 600;
   text-decoration: none;
-  transition: transform 180ms ease, background 180ms ease, border-color 180ms ease;
+  transition:
+    transform 220ms cubic-bezier(0.22, 1, 0.36, 1),
+    background 220ms ease-in-out,
+    border-color 220ms ease-in-out,
+    box-shadow 220ms ease-in-out;
 }
 
 .language-switch:hover {
   border-color: rgba(56, 189, 248, 0.45);
   background: rgba(56, 189, 248, 0.18);
+  box-shadow: 0 8px 24px rgba(14, 165, 233, 0.14);
   color: #e0f2fe;
-  transform: translateY(-2px);
+  transform: translateY(-2px) scale(1.015);
 }
 
 .hero {
@@ -265,7 +270,11 @@ h1 {
   border-radius: 16px;
   background: linear-gradient(145deg, rgba(18, 40, 64, 0.92), var(--surface));
   box-shadow: 0 18px 50px rgba(2, 8, 23, 0.2);
-  transition: transform 220ms ease, border-color 220ms ease, box-shadow 220ms ease;
+  transition:
+    transform 280ms cubic-bezier(0.22, 1, 0.36, 1),
+    border-color 260ms ease-in-out,
+    box-shadow 280ms ease-in-out,
+    background 260ms ease-in-out;
 }
 
 .stat-card::before,
@@ -288,7 +297,7 @@ h1 {
 .stat-card:hover {
   border-color: rgba(56, 189, 248, 0.28);
   box-shadow: 0 22px 58px rgba(2, 8, 23, 0.32);
-  transform: translateY(-4px);
+  transform: translateY(-3px) scale(1.008);
 }
 
 .stat-label,
@@ -339,7 +348,7 @@ h1 {
   min-width: 0;
   padding: 0.9rem 1rem;
   background: rgba(9, 22, 38, 0.96);
-  transition: background 180ms ease;
+  transition: background 240ms ease-in-out, color 240ms ease-in-out;
 }
 
 .info-strip > div:hover {
@@ -371,7 +380,7 @@ h1 {
   border: 1px solid var(--border);
   border-radius: 16px;
   background: linear-gradient(145deg, rgba(10, 30, 48, 0.96), rgba(9, 22, 38, 0.9));
-  transition: border-color 220ms ease, box-shadow 220ms ease;
+  transition: border-color 260ms ease-in-out, box-shadow 280ms ease-in-out;
 }
 
 .load-panel:hover {
@@ -426,12 +435,16 @@ h1 {
   border: 1px solid rgba(148, 163, 184, 0.1);
   border-radius: 10px;
   background: rgba(4, 13, 25, 0.32);
-  transition: transform 180ms ease, background 180ms ease;
+  transition:
+    transform 240ms cubic-bezier(0.22, 1, 0.36, 1),
+    background 240ms ease-in-out,
+    border-color 240ms ease-in-out;
 }
 
 .load-grid > div:hover {
   background: rgba(15, 37, 59, 0.52);
-  transform: translateY(-2px);
+  border-color: rgba(56, 189, 248, 0.18);
+  transform: translateY(-2px) scale(1.01);
 }
 
 .load-grid span {
@@ -492,13 +505,19 @@ h1 {
   color: #bae6fd;
   font-size: 0.76rem;
   text-decoration: none;
-  transition: background 150ms ease, border-color 150ms ease;
+  transition:
+    transform 220ms cubic-bezier(0.22, 1, 0.36, 1),
+    background 220ms ease-in-out,
+    border-color 220ms ease-in-out,
+    box-shadow 220ms ease-in-out;
 }
 
 .api-link:hover {
   border-color: rgba(56, 189, 248, 0.45);
   background: rgba(56, 189, 248, 0.2);
   color: #e0f2fe;
+  box-shadow: 0 8px 24px rgba(14, 165, 233, 0.12);
+  transform: translateY(-2px);
 }
 
 .events-table {
@@ -530,7 +549,11 @@ h1 {
 }
 
 .events-table tbody tr {
-  transition: background 150ms ease, box-shadow 150ms ease;
+  transition:
+    background 220ms ease-in-out,
+    box-shadow 220ms ease-in-out,
+    opacity 220ms ease-in-out,
+    transform 220ms ease-in-out;
 }
 
 .events-table tbody tr:hover {
@@ -543,7 +566,11 @@ html[dir="rtl"] .events-table tbody tr:hover {
 }
 
 .events-table tbody tr.is-new-event {
-  animation: row-arrive 520ms cubic-bezier(0.22, 1, 0.36, 1);
+  animation: row-arrive 340ms ease-in-out;
+}
+
+.events-table tbody.list-refreshed {
+  animation: list-refresh 240ms ease-in-out;
 }
 
 .events-table tbody tr:last-child td {
@@ -743,7 +770,10 @@ html[dir="ltr"] body {
 }
 
 .value-pop {
-  animation: value-pop 360ms ease-out;
+  display: inline-block;
+  transform-origin: 50% 50%;
+  will-change: transform;
+  animation: value-pop 280ms ease-in-out;
 }
 
 .top-nav,
@@ -752,7 +782,7 @@ html[dir="ltr"] body {
 .info-strip,
 .load-panel,
 .events-panel {
-  animation: section-enter 500ms both;
+  animation: section-enter 380ms ease-in-out both;
 }
 
 .hero { animation-delay: 60ms; }
@@ -807,8 +837,14 @@ html[dir="ltr"] body {
 }
 
 @keyframes row-arrive {
-  from { opacity: 0; transform: translateY(-8px); background: rgba(56, 189, 248, 0.14); }
+  from { opacity: 0; transform: translateY(-6px); background: rgba(56, 189, 248, 0.12); }
   to { opacity: 1; transform: translateY(0); background: transparent; }
+}
+
+@keyframes list-refresh {
+  0% { opacity: 0.72; transform: translateY(-3px); }
+  50% { opacity: 0.92; }
+  100% { opacity: 1; transform: translateY(0); }
 }
 
 @keyframes backdrop-in {
@@ -822,19 +858,33 @@ html[dir="ltr"] body {
 }
 
 @keyframes value-pop {
-  0% { color: #fff; transform: scale(1); }
-  45% { color: #7dd3fc; transform: scale(1.08); }
+  0% { color: inherit; transform: scale(1); }
+  45% { color: #7dd3fc; transform: scale(1.055); }
   100% { color: inherit; transform: scale(1); }
 }
 
 @keyframes section-enter {
-  from { opacity: 0; transform: translateY(10px); }
+  from { opacity: 0; transform: translateY(7px); }
   to { opacity: 1; transform: translateY(0); }
 }
 
 @keyframes card-enter {
-  from { opacity: 0; transform: translateY(16px) scale(0.98); }
+  from { opacity: 0; transform: translateY(10px) scale(0.99); }
   to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+body.language-leaving .dashboard-shell {
+  opacity: 0;
+  transform: translateY(-4px) scale(0.997);
+  transition: opacity 110ms ease-in-out, transform 110ms ease-in-out;
+}
+
+body.language-leaving .background-aurora,
+body.language-leaving .background-grid,
+body.language-leaving .background-particles,
+body.language-leaving .background-glow {
+  opacity: 0.35;
+  transition: opacity 110ms ease-in-out;
 }
 
 @keyframes card-sheen {

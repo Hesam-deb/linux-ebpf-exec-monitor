@@ -83,6 +83,9 @@ class DashboardTests(unittest.TestCase):
             self.assertIn(b"knownEventIds", response.data)
             self.assertIn(b"is-new-event", response.data)
             self.assertIn(b"value-pop", response.data)
+            self.assertIn(b"list-refreshed", response.data)
+            self.assertIn(b"language-leaving", response.data)
+            self.assertIn(b"window.location.assign", response.data)
         finally:
             response.close()
 

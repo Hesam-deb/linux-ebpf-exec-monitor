@@ -13,6 +13,9 @@
   let knownEventIds = new Set(
     [...eventsBody.querySelectorAll("tr[data-event-id]")].map((row) => row.dataset.eventId),
   );
+  let eventSignature = [...eventsBody.querySelectorAll("tr[data-event-id]")]
+    .map((row) => `${row.dataset.eventId}:${row.dataset.status}`)
+    .join("|");
 
   const text = (value) => document.createTextNode(String(value));
 
@@ -85,6 +88,7 @@
   function processRow(event) {
     const row = document.createElement("tr");
     row.dataset.eventId = event.event_id;
+    row.dataset.status = event.status;
     if (!knownEventIds.has(event.event_id)) row.classList.add("is-new-event");
 
     const commandCell = document.createElement("td");
@@ -189,13 +193,23 @@
     updateMonitor(payload);
 
     const currentIds = new Set(payload.events.map((event) => event.event_id));
+    const nextEventSignature = payload.events
+      .map((event) => `${event.event_id}:${event.status}`)
+      .join("|");
+    const listChanged = nextEventSignature !== eventSignature;
     if (selectedEventId && !currentIds.has(selectedEventId)) closeSelectedDetails();
 
     const fragment = document.createDocumentFragment();
     if (payload.events.length === 0) fragment.append(emptyRow());
     else payload.events.forEach((event) => fragment.append(processRow(event)));
     eventsBody.replaceChildren(fragment);
+    if (listChanged && !selectedEventId) {
+      eventsBody.classList.remove("list-refreshed");
+      void eventsBody.offsetWidth;
+      eventsBody.classList.add("list-refreshed");
+    }
     knownEventIds = currentIds;
+    eventSignature = nextEventSignature;
   }
 
   async function poll() {
@@ -221,6 +235,18 @@
 
   document.addEventListener("keydown", (event) => {
     if (event.key === "Escape") closeSelectedDetails();
+  });
+
+  document.querySelector(".language-switch")?.addEventListener("click", (event) => {
+    if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) {
+      return;
+    }
+    event.preventDefault();
+    const destination = event.currentTarget.href;
+    document.body.classList.add("language-leaving");
+    window.setTimeout(() => {
+      window.location.assign(destination);
+    }, 110);
   });
 
   document.addEventListener("visibilitychange", () => {
