@@ -8,6 +8,7 @@ import pwd
 import signal
 import threading
 import time
+from collections import deque
 from pathlib import Path
 from types import FrameType
 from typing import Any
@@ -30,6 +31,11 @@ class ExecMonitor:
         self._bpf: Any | None = None
         self._running = threading.Event()
         self._wall_time_offset_ns = time.time_ns() - time.monotonic_ns()
+        self._metrics_lock = threading.Lock()
+        self._recent_event_times: deque[float] = deque()
+        self._exec_events = 0
+        self._exit_events = 0
+        self._lost_events = 0
 
     def start(self) -> None:
         """Load the BPF program and begin polling events."""
@@ -48,7 +54,10 @@ class ExecMonitor:
 
         LOGGER.info("Loading eBPF program from %s", self.source_path)
         self._bpf = BPF(src_file=str(self.source_path))
-        self._bpf["events"].open_perf_buffer(self._handle_event)
+        self._bpf["events"].open_perf_buffer(
+            self._handle_event,
+            lost_cb=self._handle_lost_events,
+        )
         self._running.set()
 
     def stop(self) -> None:
@@ -104,6 +113,45 @@ class ExecMonitor:
             return None, os.WTERMSIG(exit_status)
         return None, None
 
+    def _record_event(self, event_type: int) -> None:
+        """Record event counts and a rolling 10-second event rate."""
+        now = time.monotonic()
+        with self._metrics_lock:
+            self._recent_event_times.append(now)
+            cutoff = now - 10
+            while self._recent_event_times and self._recent_event_times[0] < cutoff:
+                self._recent_event_times.popleft()
+
+            if event_type == EVENT_EXEC:
+                self._exec_events += 1
+            elif event_type == EVENT_EXIT:
+                self._exit_events += 1
+
+    def _handle_lost_events(self, cpu: int, lost: int) -> None:
+        """Record events dropped by a full perf buffer."""
+        with self._metrics_lock:
+            self._lost_events += int(lost)
+        LOGGER.warning("Lost %s eBPF events on CPU %s", lost, cpu)
+
+    def metrics(self) -> dict[str, Any]:
+        """Return current eBPF event-pipeline load metrics."""
+        now = time.monotonic()
+        with self._metrics_lock:
+            cutoff = now - 10
+            while self._recent_event_times and self._recent_event_times[0] < cutoff:
+                self._recent_event_times.popleft()
+
+            event_rate = len(self._recent_event_times) / 10
+            total_events = self._exec_events + self._exit_events
+            return {
+                "event_rate": round(event_rate, 1),
+                "kernel_events": total_events,
+                "exec_events": self._exec_events,
+                "exit_events": self._exit_events,
+                "lost_events": self._lost_events,
+                "buffer_healthy": self._lost_events == 0,
+            }
+
     def _handle_event(self, cpu: int, data: Any, size: int) -> None:
         """Convert a raw perf event into a lifecycle store update."""
         if self._bpf is None:
@@ -112,6 +160,7 @@ class ExecMonitor:
         try:
             raw_event = self._bpf["events"].event(data)
             event_type = int(raw_event.event_type)
+            self._record_event(event_type)
             pid = int(raw_event.pid)
             timestamp_ns = int(raw_event.timestamp_ns) + self._wall_time_offset_ns
 

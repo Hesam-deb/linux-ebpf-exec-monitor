@@ -44,6 +44,9 @@ class DashboardTests(unittest.TestCase):
         self.assertIn("جزئیات پردازش".encode(), response.data)
         self.assertIn("پایان‌یافته".encode(), response.data)
         self.assertIn(b'href="/?lang=en"', response.data)
+        self.assertNotIn(b'http-equiv="refresh"', response.data)
+        self.assertIn(b"dashboard.js", response.data)
+        self.assertIn("بار خط لولهٔ eBPF".encode(), response.data)
 
     def test_english_dashboard_uses_ltr_translations(self) -> None:
         response = self.client.get("/?lang=en")
@@ -53,6 +56,7 @@ class DashboardTests(unittest.TestCase):
         self.assertIn(b"Process Lifecycle Monitor", response.data)
         self.assertIn(b"Running now", response.data)
         self.assertIn(b"Waiting for an event", response.data)
+        self.assertIn(b"eBPF pipeline load", response.data)
         self.assertIn("فارسی".encode(), response.data)
 
     def test_unknown_language_falls_back_to_persian(self) -> None:
@@ -60,6 +64,17 @@ class DashboardTests(unittest.TestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertIn('lang="fa" dir="rtl"'.encode(), response.data)
+
+    def test_live_dashboard_script_polls_and_preserves_open_details(self) -> None:
+        response = self.client.get("/static/dashboard.js")
+
+        try:
+            self.assertEqual(response.status_code, 200)
+            self.assertIn(b"window.setInterval(poll", response.data)
+            self.assertIn(b"sessionStorage.setItem", response.data)
+            self.assertIn(b"details.open = openEventIds.has", response.data)
+        finally:
+            response.close()
 
     def test_api_returns_lifecycle_details_and_stats(self) -> None:
         event = self.add_exited_event()
@@ -70,6 +85,8 @@ class DashboardTests(unittest.TestCase):
         payload = response.get_json()
         self.assertEqual(payload["monitor_status"], "active")
         self.assertEqual(payload["monitor_error"], None)
+        self.assertIn("event_rate", payload["monitor_metrics"])
+        self.assertIn("lost_events", payload["monitor_metrics"])
         self.assertEqual(payload["stats"]["running_processes"], 0)
         self.assertEqual(payload["stats"]["exited_processes"], 1)
         self.assertEqual(payload["events"][0]["pid"], event.pid)

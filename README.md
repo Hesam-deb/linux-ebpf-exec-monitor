@@ -22,7 +22,7 @@ Every time a program starts, the dashboard shows:
 - total and unique command counts;
 - monitor health and in-memory retention information.
 
-The page refreshes every two seconds and keeps the newest 100 events in memory.
+The dashboard polls the JSON API every second without reloading the page and keeps the newest 100 events in memory. Expanded process-detail panels stay open while live data updates.
 
 ## How it works
 
@@ -123,7 +123,7 @@ ip a
 ping -c 2 8.8.8.8
 ```
 
-The dashboard should show the new commands within two seconds. Press `Ctrl+C` in the first terminal to stop the monitor.
+The dashboard should show new commands within about one second. Press `Ctrl+C` in the first terminal to stop the monitor.
 
 ## Useful configuration
 
@@ -142,6 +142,15 @@ http://127.0.0.1:5000/api/events
 ```
 
 Expand “Process details” on a dashboard row to inspect the PPID, UID, executable path, arguments, start/end timestamps, exit code, and termination signal.
+
+The “eBPF pipeline load” panel reports:
+
+- a rolling 10-second kernel event rate;
+- total exec and exit events received;
+- perf-buffer events dropped under load;
+- a buffer-health indicator.
+
+These values measure the event pipeline. They do not claim to measure the exact CPU cost of the kernel eBPF instructions.
 
 ## What “process activity” means
 
@@ -188,7 +197,7 @@ sudo ./scripts/run.sh
 
 ### The dashboard is empty
 
-Make sure the monitor status is active, then execute a command in another terminal. The page updates every two seconds.
+Make sure the monitor status is active, then execute a command in another terminal. The dashboard polls for updates every second.
 
 ### Verify that the lifecycle probes load
 

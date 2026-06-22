@@ -4,7 +4,6 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="description" content="{{ t.description }}">
-    <meta http-equiv="refresh" content="2">
     <title>{{ t.page_title }}</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -31,7 +30,7 @@
           <p class="hero-description">{{ t.hero_description }}</p>
         </div>
 
-        <div class="monitor-badge monitor-badge-{{ monitor_status }}">
+        <div id="monitor-status" class="monitor-badge monitor-badge-{{ monitor_status }}">
           <span class="status-dot"></span>
           {% if monitor_status == "active" %}
           {{ t.status_active }}
@@ -43,35 +42,33 @@
         </div>
       </header>
 
-      {% if monitor_error %}
-      <section class="error-panel" role="alert">
+      <section id="monitor-error" class="error-panel{% if not monitor_error %} is-hidden{% endif %}" role="alert">
         <strong>{{ t.load_error }}</strong>
-        <span dir="ltr">{{ monitor_error }}</span>
+        <span id="monitor-error-message" dir="ltr">{{ monitor_error or "" }}</span>
       </section>
-      {% endif %}
 
       <section class="stats-grid" aria-label="{{ t.stats_label }}">
         <article class="stat-card">
           <span class="stat-label">{{ t.total_events }}</span>
-          <strong>{{ stats.total_events }}</strong>
+          <strong id="total-events">{{ stats.total_events }}</strong>
           <small>{{ t.since_start }}</small>
         </article>
 
         <article class="stat-card">
           <span class="stat-label">{{ t.retained_events }}</span>
-          <strong>{{ stats.retained_events }} <span>{{ t.of }} {{ stats.max_events }}</span></strong>
+          <strong><span id="retained-events">{{ stats.retained_events }}</span> <span>{{ t.of }} <span id="max-events">{{ stats.max_events }}</span></span></strong>
           <small>{{ t.retained_help }}</small>
         </article>
 
         <article class="stat-card">
           <span class="stat-label">{{ t.running_processes }}</span>
-          <strong>{{ stats.running_processes }}</strong>
+          <strong id="running-processes">{{ stats.running_processes }}</strong>
           <small>{{ t.running_help }}</small>
         </article>
 
         <article class="stat-card">
           <span class="stat-label">{{ t.last_update }}</span>
-          <strong class="time-value technical-value">{{ stats.last_update }}</strong>
+          <strong id="last-update" class="time-value technical-value">{{ stats.last_update }}</strong>
           <small>{{ t.local_time }}</small>
         </article>
       </section>
@@ -79,7 +76,7 @@
       <section class="info-strip">
         <div>
           <span class="info-label">{{ t.latest_command }}</span>
-          <strong class="technical-value command-preview">{{ stats.latest_command }}</strong>
+          <strong id="latest-command" class="technical-value command-preview">{{ stats.latest_command }}</strong>
         </div>
         <div>
           <span class="info-label">{{ t.event_source }}</span>
@@ -87,11 +84,45 @@
         </div>
         <div>
           <span class="info-label">{{ t.refresh_rate }}</span>
-          <strong>{{ t.every_two_seconds }}</strong>
+          <strong>{{ t.update_interval }}</strong>
         </div>
         <div>
           <span class="info-label">{{ t.transport }}</span>
           <strong>Perf Buffer</strong>
+        </div>
+      </section>
+
+      <section class="load-panel" aria-labelledby="load-title">
+        <div class="load-heading">
+          <div>
+            <span class="section-kicker">{{ t.load_title }}</span>
+            <h2 id="load-title">{{ t.load_description }}</h2>
+          </div>
+          <span id="buffer-health" class="buffer-health {% if monitor_metrics.buffer_healthy %}buffer-healthy{% else %}buffer-degraded{% endif %}">
+            {% if monitor_metrics.buffer_healthy %}{{ t.buffer_healthy }}{% else %}{{ t.buffer_degraded }}{% endif %}
+          </span>
+        </div>
+        <div class="load-grid">
+          <div>
+            <span>{{ t.event_rate }}</span>
+            <strong><span id="event-rate">{{ monitor_metrics.event_rate }}</span> <small>{{ t.events_per_second }}</small></strong>
+          </div>
+          <div>
+            <span>{{ t.kernel_events }}</span>
+            <strong id="kernel-events">{{ monitor_metrics.kernel_events }}</strong>
+          </div>
+          <div>
+            <span>{{ t.exec_events }}</span>
+            <strong id="exec-events">{{ monitor_metrics.exec_events }}</strong>
+          </div>
+          <div>
+            <span>{{ t.exit_events }}</span>
+            <strong id="exit-events">{{ monitor_metrics.exit_events }}</strong>
+          </div>
+          <div>
+            <span>{{ t.lost_events }}</span>
+            <strong id="lost-events">{{ monitor_metrics.lost_events }}</strong>
+          </div>
         </div>
       </section>
 
@@ -116,9 +147,9 @@
                 <th scope="col">{{ t.details }}</th>
               </tr>
             </thead>
-            <tbody>
+            <tbody id="events-body">
               {% for event in events %}
-              <tr>
+              <tr data-event-id="{{ event.event_id }}">
                 <td>
                   <span class="command-cell technical-value">{{ event.command }}</span>
                 </td>
@@ -134,7 +165,7 @@
                 </td>
                 <td class="technical-value timestamp-cell">{{ event.duration }}</td>
                 <td>
-                  <details class="process-details">
+                  <details class="process-details" data-event-id="{{ event.event_id }}">
                     <summary>{{ t.details }}</summary>
                     <dl>
                       <div><dt>{{ t.pid }}</dt><dd class="technical-value">{{ event.pid }}</dd></div>
@@ -181,5 +212,13 @@
 
       <footer>{{ t.footer }}</footer>
     </main>
+    <script id="dashboard-config" type="application/json">
+      {{ {
+        "api_url": url_for("api_events"),
+        "poll_interval_ms": 1000,
+        "translations": t
+      } | tojson }}
+    </script>
+    <script src="{{ url_for('static', filename='dashboard.js') }}" defer></script>
   </body>
 </html>

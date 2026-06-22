@@ -77,7 +77,7 @@
     <tr><td>Identity</td><td>Capture PID, parent PID, UID, and resolve the local user name.</td></tr>
     <tr><td>Invocation</td><td>Read executable path and command-line arguments from <code>/proc/&lt;pid&gt;</code> on a best-effort basis.</td></tr>
     <tr><td>Lifecycle</td><td>Correlate start and exit events, calculate duration, and decode exit code or terminating signal.</td></tr>
-    <tr><td>Dashboard</td><td>Responsive dark UI, Persian and English languages, RTL/LTR layouts, status badges, statistics, expandable process details, and JSON output.</td></tr>
+    <tr><td>Dashboard</td><td>Responsive dark UI, Persian and English languages, RTL/LTR layouts, live one-second polling, persistent expanded details, eBPF pipeline-load metrics, and JSON output.</td></tr>
     <tr><td>Documentation</td><td>Friendly English and Persian READMEs with HTTPS/SSH clone addresses, requirements, installation, troubleshooting, and limitations.</td></tr>
     <tr><td>Quality</td><td>Automated model and Flask tests for lifecycle correlation, serialization, translations, and API behavior.</td></tr>
   </table>
@@ -113,6 +113,14 @@ Flask dashboard   JSON API</pre>
     <li>Start time, exit time, and duration</li>
     <li>Exit code or termination signal</li>
   </ul>
+
+  <h3>Live eBPF pipeline load</h3>
+  <p>
+    The dashboard reports a rolling event rate, exec/exit totals, lost perf-buffer
+    events, and buffer health. These values measure event-pipeline pressure rather
+    than claiming to measure exact kernel instruction CPU cost. Data updates without
+    a page reload, so expanded process details remain open.
+  </p>
 
   <div class="note">
     “What the process is doing” is intentionally scoped to lifecycle information.
@@ -165,8 +173,9 @@ sudo ./scripts/run.sh</pre>
       <li>خواندن مسیر فایل اجرایی و آرگومان‌ها از <code>/proc</code></li>
       <li>تطبیق رویداد شروع و پایان و محاسبهٔ مدت اجرا</li>
       <li>نمایش کد خروج یا سیگنال پایان</li>
-      <li>داشبورد واکنش‌گرا با زبان فارسی و انگلیسی و حالت RTL/LTR</li>
+      <li>داشبورد واکنش‌گرا با زبان فارسی و انگلیسی، حالت RTL/LTR و به‌روزرسانی زندهٔ یک‌ثانیه‌ای</li>
       <li>جزئیات بازشونده برای هر پردازش و خروجی JSON</li>
+      <li>حفظ پنل جزئیات بازشده و نمایش نرخ رویداد، رویدادهای ازدست‌رفته و سلامت perf buffer</li>
       <li>آزمون‌های خودکار برای مدل، API و رابط دوزبانه</li>
     </ul>
 
@@ -187,6 +196,14 @@ sudo ./scripts/run.sh</pre>
       <li>زمان شروع، زمان پایان و مدت اجرا</li>
       <li>کد خروج یا سیگنال پایان</li>
     </ul>
+
+    <h3>بار زندهٔ خط لولهٔ eBPF</h3>
+    <p>
+      داشبورد نرخ متحرک رویدادها، مجموع رویدادهای اجرا و خروج، رویدادهای
+      ازدست‌رفته و سلامت perf buffer را نشان می‌دهد. این معیارها فشار خط لولهٔ
+      رویداد را اندازه می‌گیرند، نه مصرف دقیق CPU دستورهای eBPF در هسته.
+      به‌روزرسانی بدون بارگذاری دوبارهٔ صفحه انجام می‌شود و جزئیات باز می‌مانند.
+    </p>
 
     <div class="note">
       منظور از فعالیت پردازش در این نسخه، چرخهٔ عمر آن است. بررسی فایل‌ها،

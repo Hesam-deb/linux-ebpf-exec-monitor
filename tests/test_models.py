@@ -29,6 +29,7 @@ class ExecEventTests(unittest.TestCase):
         self.assertEqual(
             event.to_dict(),
             {
+                "event_id": f"42:{start_ns}",
                 "pid": 42,
                 "ppid": 7,
                 "uid": 1000,

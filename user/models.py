@@ -82,6 +82,7 @@ class ExecEvent:
     def to_dict(self) -> dict[str, Any]:
         """Serialize the lifecycle record for templates and JSON."""
         return {
+            "event_id": f"{self.pid}:{self.timestamp_ns}",
             "pid": self.pid,
             "ppid": self.ppid,
             "uid": self.uid,
