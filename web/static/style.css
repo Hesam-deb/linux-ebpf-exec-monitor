@@ -58,6 +58,32 @@ body {
   padding-bottom: 2rem;
 }
 
+.top-nav {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.65rem;
+  margin-bottom: 1.2rem;
+  color: var(--muted);
+  font-size: 0.76rem;
+}
+
+.language-switch {
+  padding: 0.42rem 0.7rem;
+  border: 1px solid rgba(56, 189, 248, 0.24);
+  border-radius: 999px;
+  background: var(--primary-soft);
+  color: #bae6fd;
+  font-family: "Vazirmatn", Tahoma, sans-serif;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.language-switch:hover {
+  border-color: rgba(56, 189, 248, 0.45);
+  color: #e0f2fe;
+}
+
 .hero {
   display: flex;
   align-items: flex-start;
@@ -359,6 +385,14 @@ h1 {
   direction: ltr;
   unicode-bidi: embed;
   text-align: right;
+}
+
+html[dir="ltr"] .technical-value {
+  text-align: left;
+}
+
+html[dir="ltr"] body {
+  font-family: Inter, "Vazirmatn", system-ui, sans-serif;
 }
 
 footer {

@@ -1,11 +1,11 @@
 <!doctype html>
-<html lang="fa" dir="rtl">
+<html lang="{{ language }}" dir="{{ t.direction }}">
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="description" content="داشبورد آموزشی پایش اجرای پردازش‌های لینوکس با eBPF">
+    <meta name="description" content="{{ t.description }}">
     <meta http-equiv="refresh" content="2">
-    <title>پایشگر پردازش‌های لینوکس با eBPF</title>
+    <title>{{ t.page_title }}</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -17,75 +17,80 @@
     <div class="background-glow background-glow-two"></div>
 
     <main class="container dashboard-shell">
+      <nav class="top-nav" aria-label="Language">
+        <span>{{ t.language_name }}</span>
+        <a class="language-switch" href="{{ url_for('index', lang=alternate_language) }}" hreflang="{{ alternate_language }}">
+          {{ t.other_language }}
+        </a>
+      </nav>
+
       <header class="hero">
         <div>
-          <div class="eyebrow">Linux Kernel Observability</div>
-          <h1>پایشگر اجرای پردازش‌ها</h1>
-          <p class="hero-description">
-            مشاهدهٔ اجرای دستورها در هستهٔ لینوکس با eBPF؛ سبک، زنده و مناسب یادگیری.
-          </p>
+          <div class="eyebrow">{{ t.eyebrow }}</div>
+          <h1>{{ t.heading }}</h1>
+          <p class="hero-description">{{ t.hero_description }}</p>
         </div>
 
         <div class="monitor-badge monitor-badge-{{ monitor_status }}">
           <span class="status-dot"></span>
           {% if monitor_status == "active" %}
-          پایشگر فعال است
+          {{ t.status_active }}
           {% elif monitor_status == "starting" %}
-          در حال راه‌اندازی پایشگر
+          {{ t.status_starting }}
           {% else %}
-          پایشگر با خطا متوقف شده
+          {{ t.status_error }}
           {% endif %}
         </div>
       </header>
 
       {% if monitor_error %}
       <section class="error-panel" role="alert">
-        <strong>بارگذاری eBPF ناموفق بود</strong>
+        <strong>{{ t.load_error }}</strong>
         <span dir="ltr">{{ monitor_error }}</span>
       </section>
       {% endif %}
 
-      <section class="stats-grid" aria-label="آمار پایشگر">
+      <section class="stats-grid" aria-label="{{ t.stats_label }}">
         <article class="stat-card">
-          <span class="stat-label">مجموع رویدادها</span>
+          <span class="stat-label">{{ t.total_events }}</span>
           <strong>{{ stats.total_events }}</strong>
-          <small>از زمان اجرای برنامه</small>
+          <small>{{ t.since_start }}</small>
         </article>
 
         <article class="stat-card">
-          <span class="stat-label">رویدادهای موجود</span>
-          <strong>{{ stats.retained_events }} <span>از {{ stats.max_events }}</span></strong>
-          <small>جدیدترین رویدادهای داخل حافظه</small>
+          <span class="stat-label">{{ t.retained_events }}</span>
+          <strong>{{ stats.retained_events }} <span>{{ t.of }} {{ stats.max_events }}</span></strong>
+          <small>{{ t.retained_help }}</small>
         </article>
 
         <article class="stat-card">
-          <span class="stat-label">دستورهای یکتا</span>
+          <span class="stat-label">{{ t.unique_commands }}</span>
           <strong>{{ stats.unique_commands }}</strong>
-          <small>در بازهٔ فعلی رویدادها</small>
+          <small>{{ t.window_help }}</small>
         </article>
 
         <article class="stat-card">
-          <span class="stat-label">آخرین به‌روزرسانی</span>
+          <span class="stat-label">{{ t.last_update }}</span>
           <strong class="time-value technical-value">{{ stats.last_update }}</strong>
-          <small>زمان محلی سیستم</small>
+          <small>{{ t.local_time }}</small>
         </article>
       </section>
 
       <section class="info-strip">
         <div>
-          <span class="info-label">آخرین دستور</span>
+          <span class="info-label">{{ t.latest_command }}</span>
           <strong class="technical-value command-preview">{{ stats.latest_command }}</strong>
         </div>
         <div>
-          <span class="info-label">منبع رویداد</span>
+          <span class="info-label">{{ t.event_source }}</span>
           <strong class="technical-value">sched_process_exec</strong>
         </div>
         <div>
-          <span class="info-label">نرخ به‌روزرسانی</span>
-          <strong>هر ۲ ثانیه</strong>
+          <span class="info-label">{{ t.refresh_rate }}</span>
+          <strong>{{ t.every_two_seconds }}</strong>
         </div>
         <div>
-          <span class="info-label">روش انتقال</span>
+          <span class="info-label">{{ t.transport }}</span>
           <strong>Perf Buffer</strong>
         </div>
       </section>
@@ -93,19 +98,19 @@
       <section class="events-panel">
         <div class="section-heading">
           <div>
-            <span class="section-kicker">جریان رویدادها</span>
-            <h2>آخرین پردازش‌های اجراشده</h2>
+            <span class="section-kicker">{{ t.event_stream }}</span>
+            <h2>{{ t.latest_processes }}</h2>
           </div>
-          <a class="api-link" href="{{ url_for('api_events') }}">مشاهدهٔ خروجی JSON</a>
+          <a class="api-link" href="{{ url_for('api_events') }}">{{ t.view_json }}</a>
         </div>
 
         <div class="table-responsive">
           <table class="events-table">
             <thead>
               <tr>
-                <th scope="col">دستور</th>
-                <th scope="col">شناسهٔ پردازش (PID)</th>
-                <th scope="col">زمان ثبت</th>
+                <th scope="col">{{ t.command }}</th>
+                <th scope="col">{{ t.pid }}</th>
+                <th scope="col">{{ t.timestamp }}</th>
               </tr>
             </thead>
             <tbody>
@@ -121,8 +126,8 @@
               <tr>
                 <td colspan="3" class="empty-state">
                   <span class="empty-icon">⌁</span>
-                  <strong>هنوز رویدادی دریافت نشده است</strong>
-                  <small>در یک ترمینال دیگر دستوری مثل <code>ls</code> یا <code>whoami</code> اجرا کنید.</small>
+                  <strong>{{ t.empty_title }}</strong>
+                  <small>{{ t.empty_help }} <code>ls</code> {{ t.or }} <code>whoami</code> {{ t.empty_suffix }}</small>
                 </td>
               </tr>
               {% endfor %}
@@ -131,9 +136,7 @@
         </div>
       </section>
 
-      <footer>
-        این داشبورد یک نمونهٔ آموزشی است و جایگزین ابزارهای امنیتی عملیاتی نیست.
-      </footer>
+      <footer>{{ t.footer }}</footer>
     </main>
   </body>
 </html>

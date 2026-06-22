@@ -28,6 +28,24 @@ class DashboardTests(unittest.TestCase):
         self.assertIn(b"Vazirmatn", response.data)
         self.assertIn("مشاهدهٔ خروجی JSON".encode(), response.data)
         self.assertIn("پایشگر فعال است".encode(), response.data)
+        self.assertIn(b'href="/?lang=en"', response.data)
+
+    def test_english_dashboard_uses_ltr_translations(self) -> None:
+        response = self.client.get("/?lang=en")
+
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(b'lang="en" dir="ltr"', response.data)
+        self.assertIn(b"Process Execution Monitor", response.data)
+        self.assertIn(b"Monitor is active", response.data)
+        self.assertIn(b"View JSON output", response.data)
+        self.assertIn(b"Waiting for an event", response.data)
+        self.assertIn("فارسی".encode(), response.data)
+
+    def test_unknown_language_falls_back_to_persian(self) -> None:
+        response = self.client.get("/?lang=unknown")
+
+        self.assertEqual(response.status_code, 200)
+        self.assertIn('lang="fa" dir="rtl"'.encode(), response.data)
 
     def test_api_returns_current_events_and_stats(self) -> None:
         event = ExecEvent(pid=7, command="bash", timestamp_ns=0)

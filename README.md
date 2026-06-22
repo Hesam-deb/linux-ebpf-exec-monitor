@@ -101,6 +101,12 @@ Then open:
 http://127.0.0.1:5000
 ```
 
+The dashboard starts in Persian. Use the language switch in the header or open the English version directly:
+
+```text
+http://127.0.0.1:5000/?lang=en
+```
+
 Keep the first terminal running. In a second terminal, generate a few events:
 
 ```bash
