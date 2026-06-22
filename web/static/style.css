@@ -110,8 +110,8 @@ body {
 }
 
 .dashboard-shell {
-  width: calc(100% - 2rem);
-  max-width: 1220px;
+  width: min(96vw, 1580px);
+  max-width: none;
   margin: 0 auto;
   padding-top: 3rem;
   padding-bottom: 2rem;
@@ -257,7 +257,7 @@ h1 {
 .usage-section {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 1rem;
+  gap: 1.2rem;
   margin-bottom: 1rem;
   animation: section-enter 380ms ease-in-out backwards;
   animation-delay: 80ms;
@@ -365,7 +365,7 @@ h1 {
 .stats-grid {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 1rem;
+  gap: 1.1rem;
   margin-bottom: 1rem;
 }
 
@@ -639,7 +639,7 @@ h1 {
 
 .events-table th,
 .events-table td {
-  padding: 0.95rem 1.4rem;
+  padding: 1rem 1.6rem;
   border-bottom: 1px solid rgba(148, 163, 184, 0.1);
   white-space: nowrap;
 }
@@ -1006,6 +1006,10 @@ footer {
 }
 
 @media (max-width: 992px) {
+  .dashboard-shell {
+    width: calc(100% - 2rem);
+  }
+
   .usage-section {
     grid-template-columns: 1fr;
   }
@@ -1025,6 +1029,7 @@ footer {
 
 @media (max-width: 640px) {
   .dashboard-shell {
+    width: calc(100% - 1.25rem);
     padding-top: 1.5rem;
   }
 

@@ -111,6 +111,7 @@ class DashboardTests(unittest.TestCase):
                 1,
             )[0]
             self.assertNotIn("scale(", value_animation)
+            self.assertIn("width: min(96vw, 1580px)", css)
         finally:
             response.close()
 
